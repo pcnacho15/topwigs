@@ -1,0 +1,221 @@
+import type { SVGProps } from "react";
+
+/**
+ * Set de iconos de marca TOPWIGS (trazo, estilo doodle gótico/Y2K).
+ * Todos heredan el color vía `currentColor` y aceptan props de <svg>.
+ * Uso: <Star className="size-4 text-neon" />
+ */
+
+type IconProps = SVGProps<SVGSVGElement>;
+
+const base: IconProps = {
+  viewBox: "0 0 24 24",
+  fill: "none",
+  stroke: "currentColor",
+  strokeWidth: 1.6,
+  strokeLinecap: "round",
+  strokeLinejoin: "round",
+  width: "1em",
+  height: "1em",
+  "aria-hidden": true,
+};
+
+/* --- Decorativos --- */
+
+export function Star(props: IconProps) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M12 3l2 5.5L20 9l-4.5 3.5L17 18l-5-3-5 3 1.5-5.5L4 9l6-.5L12 3z" />
+    </svg>
+  );
+}
+
+export function Sparkle(props: IconProps) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M12 3c.4 4 1.5 5.1 5.5 5.5C13.5 8.9 12.4 10 12 14c-.4-4-1.5-5.1-5.5-5.5C10.5 8.1 11.6 7 12 3z" />
+    </svg>
+  );
+}
+
+export function Heart(props: IconProps) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M12 20s-7-4.3-9-9c-1.2-2.9.6-6 3.6-6 2 0 3.4 1.4 4.4 3 1-1.6 2.4-3 4.4-3 3 0 4.8 3.1 3.6 6-2 4.7-9 9-9 9z" />
+    </svg>
+  );
+}
+
+/** Corazón con goteo (motivo emo de la plantilla) */
+export function HeartDrip(props: IconProps) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M12 17s-6-3.7-7.7-7.7C3.3 6.9 4.8 4.5 7.3 4.5c1.7 0 2.9 1.2 3.7 2.6.8-1.4 2-2.6 3.7-2.6 2.5 0 4 2.4 3 4.8C20 13.3 12 17 12 17z" />
+      <path d="M8.5 16v2.5M12 17.5V21M15.5 16v2" />
+    </svg>
+  );
+}
+
+/** Conejo (mascota/elemento gráfico de la plantilla) */
+export function Bunny(props: IconProps) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M9 11c-1-2-1.5-4.5-1-6.5.3-1 1.4-.8 1.8.2.6 1.6 1 3.5 1.2 5.3" />
+      <path d="M15 11c1-2 1.5-4.5 1-6.5-.3-1-1.4-.8-1.8.2-.6 1.6-1 3.5-1.2 5.3" />
+      <path d="M7 15a5 5 0 0 1 10 0v2a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2v-2z" />
+      <path d="M10.5 15h3M12 15v1.5" />
+    </svg>
+  );
+}
+
+
+
+/** Cadena (motivo gótico) */
+export function Chain(props: IconProps) {
+  return (
+    <svg {...base} {...props}>
+      <rect x="3.5" y="9.5" width="7" height="5" rx="2.5" transform="rotate(-45 7 12)" />
+      <rect x="13.5" y="9.5" width="7" height="5" rx="2.5" transform="rotate(-45 17 12)" />
+      <path d="M10 14l4-4" />
+    </svg>
+  );
+}
+
+/* --- Acciones / navegación --- */
+
+export function Cart(props: IconProps) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M3 4h2l2.2 11.2a1 1 0 0 0 1 .8h8.6a1 1 0 0 0 1-.8L20 8H6" />
+      <circle cx="9.5" cy="20" r="1.3" />
+      <circle cx="17.5" cy="20" r="1.3" />
+    </svg>
+  );
+}
+
+export function User(props: IconProps) {
+  return (
+    <svg {...base} {...props}>
+      <circle cx="12" cy="8" r="3.5" />
+      <path d="M5 20a7 7 0 0 1 14 0" />
+    </svg>
+  );
+}
+
+export function Search(props: IconProps) {
+  return (
+    <svg {...base} {...props}>
+      <circle cx="11" cy="11" r="6" />
+      <path d="M20 20l-3.5-3.5" />
+    </svg>
+  );
+}
+
+export function ChevronLeft(props: IconProps) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M15 6l-6 6 6 6" />
+    </svg>
+  );
+}
+
+export function ChevronRight(props: IconProps) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M9 6l6 6-6 6" />
+    </svg>
+  );
+}
+
+export function Minus(props: IconProps) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M5 12h14" />
+    </svg>
+  );
+}
+
+export function Plus(props: IconProps) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M12 5v14M5 12h14" />
+    </svg>
+  );
+}
+
+/* --- Redes / contacto --- */
+
+export function Instagram(props: IconProps) {
+  return (
+    <svg {...base} {...props}>
+      <rect x="4" y="4" width="16" height="16" rx="4.5" />
+      <circle cx="12" cy="12" r="3.5" />
+      <circle cx="17" cy="7" r="0.6" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
+
+export function TikTok(props: IconProps) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M14 4v9.5a3.5 3.5 0 1 1-3-3.46" />
+      <path d="M14 4c.4 2.3 1.8 3.7 4 4" />
+    </svg>
+  );
+}
+
+export function WhatsApp(props: IconProps) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M4 20l1.3-3.9A7.5 7.5 0 1 1 8 19.1L4 20z" />
+      <path d="M9 9.5c0 3 2.5 5.5 5.5 5.5.7 0 1-.6.8-1.2l-1.4-.9c-.4-.2-.7 0-.9.3-.8-.3-1.5-1-1.8-1.8.3-.2.5-.5.3-.9l-.9-1.4c-.3-.5-1.2-.2-1.6.5A2 2 0 0 0 9 9.5z" />
+    </svg>
+  );
+}
+
+export function Mail(props: IconProps) {
+  return (
+    <svg {...base} {...props}>
+      <rect x="3.5" y="5.5" width="17" height="13" rx="2.5" />
+      <path d="M4 7l8 6 8-6" />
+    </svg>
+  );
+}
+
+/* --- Iconos de beneficios (sección "¿Por qué TOPWIGS?") --- */
+
+export function Fire(props: IconProps) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M12 3c1 3-1.5 4-1.5 6.5A2.5 2.5 0 0 0 13 12c.5-1 .3-2 0-2.5 2 1 3.5 3 3.5 5.5a4.5 4.5 0 1 1-9 0C7.5 8 12 7 12 3z" />
+    </svg>
+  );
+}
+
+export function Thermometer(props: IconProps) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M10 13.5V6a2 2 0 1 1 4 0v7.5a4 4 0 1 1-4 0z" />
+      <path d="M12 15.5v-6" />
+    </svg>
+  );
+}
+
+export function Truck(props: IconProps) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M3 6h11v9H3zM14 9h4l3 3v3h-7" />
+      <circle cx="7" cy="18" r="1.6" />
+      <circle cx="17.5" cy="18" r="1.6" />
+    </svg>
+  );
+}
+
+export function Mask(props: IconProps) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M4 6c4-1 12-1 16 0 0 5-1 9-4 11-1 .7-3 1-4 1s-3-.3-4-1C5 15 4 11 4 6z" />
+      <path d="M8.5 10.5c.6-.6 1.6-.6 2.2 0M13.3 10.5c.6-.6 1.6-.6 2.2 0" />
+    </svg>
+  );
+}

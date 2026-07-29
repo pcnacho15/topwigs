@@ -1,0 +1,151 @@
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { categorySchema, type CategoryInput } from "@/lib/schemas/category";
+import { createCategoria, updateCategoria } from "@/app/admin/categorias/actions";
+import {
+  Form,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormMessage,
+  FormDescription,
+} from "@/components/shadcn/form";
+import { Input } from "@/components/shadcn/input";
+import { Switch } from "@/components/shadcn/switch";
+import { Button } from "@/components/shadcn/button";
+import { slugify } from "@/lib/utils";
+
+interface Props {
+  mode: "create" | "edit";
+  id?: string;
+  initial?: CategoryInput;
+}
+
+export function CategoryForm({ mode, id, initial }: Props) {
+  const router = useRouter();
+  const [error, setError] = useState<string | null>(null);
+
+  const form = useForm<CategoryInput>({
+    resolver: zodResolver(categorySchema),
+    defaultValues: initial ?? { nombre: "", slug: "", orden: 0, activa: true },
+  });
+
+  async function onSubmit(values: CategoryInput) {
+    setError(null);
+    const res =
+      mode === "create"
+        ? await createCategoria(values)
+        : await updateCategoria(id!, values);
+    if (!res.ok) {
+      setError(res.error);
+      return;
+    }
+    router.push("/admin/categorias");
+    router.refresh();
+  }
+
+  return (
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="max-w-lg space-y-6">
+        <FormField
+          control={form.control}
+          name="nombre"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Nombre</FormLabel>
+              <FormControl>
+                <Input
+                  {...field}
+                  onChange={(e) => {
+                    field.onChange(e);
+                    // Autogenera el slug mientras no se haya editado a mano.
+                    if (!form.getFieldState("slug").isDirty) {
+                      form.setValue("slug", slugify(e.target.value));
+                    }
+                  }}
+                  placeholder="Fantasía"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="slug"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Slug</FormLabel>
+              <FormControl>
+                <Input {...field} placeholder="fantasia" />
+              </FormControl>
+              <FormDescription>Se usa en la URL del catálogo.</FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="orden"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Orden</FormLabel>
+              <FormControl>
+                <Input
+                  type="number"
+                  min={0}
+                  value={field.value}
+                  onChange={(e) => field.onChange(e.target.valueAsNumber || 0)}
+                />
+              </FormControl>
+              <FormDescription>Posición en los listados (menor primero).</FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="activa"
+          render={({ field }) => (
+            <FormItem className="flex items-center justify-between rounded-md border border-linea p-3">
+              <div className="space-y-0.5">
+                <FormLabel>Activa</FormLabel>
+                <FormDescription>Visible en la tienda.</FormDescription>
+              </div>
+              <FormControl>
+                <Switch checked={field.value} onCheckedChange={field.onChange} />
+              </FormControl>
+            </FormItem>
+          )}
+        />
+
+        {error ? <p className="text-sm text-red-500">{error}</p> : null}
+
+        <div className="flex gap-3">
+          <Button type="submit" disabled={form.formState.isSubmitting}>
+            {form.formState.isSubmitting
+              ? "Guardando…"
+              : mode === "create"
+                ? "Crear categoría"
+                : "Guardar cambios"}
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => router.push("/admin/categorias")}
+          >
+            Cancelar
+          </Button>
+        </div>
+      </form>
+    </Form>
+  );
+}

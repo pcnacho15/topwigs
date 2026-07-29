@@ -1,0 +1,132 @@
+// TOPWIGS — modelo de datos
+// Prisma 6 · PostgreSQL. Incluye modelos de dominio + tablas de Better Auth.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─────────────── Dominio ───────────────
+
+model Category {
+  id        String    @id @default(cuid())
+  slug      String    @unique
+  nombre    String
+  orden     Int       @default(0)
+  activa    Boolean   @default(true)
+  products  Product[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Product {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  nombre          String
+  descripcion     String
+  precioCop       Int
+  precioOfertaCop Int? // precio con descuento (opcional). Si < precioCop → en oferta
+  tipo            String   @default("peluca") // "peluca" | "lente" (define la carpeta en Cloudinary)
+  categoryId      String
+  category        Category @relation(fields: [categoryId], references: [id])
+  rating          Float    @default(0)
+  reviews         Int      @default(0)
+  nuevo           Boolean  @default(false)
+  activo          Boolean  @default(true)
+  // Estructuras flexibles (se normalizan si hace falta filtrar):
+  colores         Json     @default("[]") // {nombre,tipo:"solid"|"gradient",from,to}[]
+  features        Json     @default("[]") // string[]
+  imagenes        Json     @default("[]") // string[] (URLs Cloudinary)
+  videos          Json     @default("[]") // string[] (URLs Cloudinary)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([categoryId])
+}
+
+model Order {
+  id                 String   @id @default(cuid())
+  reference          String   @unique
+  userId             String?
+  user               User?    @relation(fields: [userId], references: [id])
+  customerName       String
+  customerEmail      String
+  customerPhone      String
+  items              Json // snapshot: {slug,nombre,precio,color,qty}[]
+  totalCop           Int
+  status             String   @default("PENDING") // PENDING|APPROVED|DECLINED|VOIDED|ERROR
+  wompiTransactionId String?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  @@index([userId])
+}
+
+// ─────────────── Better Auth ───────────────
+
+model User {
+  id            String   @id @default(cuid())
+  name          String
+  email         String   @unique
+  emailVerified Boolean  @default(false)
+  image         String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // plugin admin
+  role       String?   @default("user")
+  banned     Boolean?  @default(false)
+  banReason  String?
+  banExpires DateTime?
+
+  sessions Session[]
+  accounts Account[]
+  orders   Order[]
+}
+
+model Session {
+  id             String   @id @default(cuid())
+  expiresAt      DateTime
+  token          String   @unique
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  ipAddress      String?
+  userAgent      String?
+  userId         String
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  impersonatedBy String? // plugin admin
+
+  @@index([userId])
+}
+
+model Account {
+  id                    String    @id @default(cuid())
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@index([userId])
+}
+
+model Verification {
+  id         String   @id @default(cuid())
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
