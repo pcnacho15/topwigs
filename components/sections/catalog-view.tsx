@@ -20,10 +20,19 @@ const norm = (s: string) =>
     .replace(/\p{Diacritic}/gu, "");
 
 export function CatalogView({
+  titulo,
+  ventana,
+  buscar,
   productos,
   categorias,
   initialCategoria,
 }: {
+  /** Encabezado de la página (p. ej. "Pelucas"). */
+  titulo: string;
+  /** Título de la RetroWindow (p. ej. "pelucas.exe"). */
+  ventana: string;
+  /** Placeholder del buscador. */
+  buscar: string;
   productos: PublicProduct[];
   categorias: PublicCategory[];
   initialCategoria: string;
@@ -65,11 +74,11 @@ export function CatalogView({
   return (
     <main className="mx-auto w-full max-w-6xl px-4 py-12">
       <Reveal className="mb-8 flex justify-center">
-        <SectionHeading>Catálogo</SectionHeading>
+        <SectionHeading>{titulo}</SectionHeading>
       </Reveal>
 
       <Reveal>
-        <RetroWindow title="catalogo.exe">
+        <RetroWindow title={ventana}>
           <div className="space-y-6 p-5 sm:p-8">
             {/* Filtros + búsqueda */}
             <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
@@ -97,7 +106,7 @@ export function CatalogView({
                   type="search"
                   value={query}
                   onChange={(e) => onSearch(e.target.value)}
-                  placeholder="Buscar peluca…"
+                  placeholder={buscar}
                   className="w-full rounded-goth border border-linea bg-surface-1 py-2.5 pl-9 pr-3 text-sm text-blanco placeholder:text-humo/60 focus:border-neon focus:outline-none"
                 />
               </label>

@@ -36,7 +36,7 @@ export default async function ResultadoPage({
           Transacción: {id}
         </p>
       ) : null}
-      <Link href="/catalogo">
+      <Link href="/pelucas">
         <Button>Seguir comprando</Button>
       </Link>
     </main>

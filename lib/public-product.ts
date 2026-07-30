@@ -1,6 +1,9 @@
 /** Tipos "públicos" (serializables) que consumen los componentes de la
  * tienda. Se derivan del modelo Prisma pero sin acoplarse a él. */
 
+/** Tipo de producto: cada uno tiene su propio catálogo. */
+export type ProductTipo = "peluca" | "lente";
+
 export interface PublicColor {
   nombre: string;
   tipo: "solid" | "gradient";

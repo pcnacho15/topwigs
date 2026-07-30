@@ -11,7 +11,8 @@ export type ActionResult = { ok: true } | { ok: false; error: string };
 function revalidate() {
   revalidatePath("/admin/categorias");
   revalidatePath("/admin");
-  revalidatePath("/catalogo");
+  revalidatePath("/pelucas");
+  revalidatePath("/lentes");
   revalidatePath("/"); // tarjetas de categoría del Home
 }
 

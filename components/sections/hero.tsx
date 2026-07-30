@@ -181,7 +181,7 @@ export function Hero() {
         {/* CTA interactivo (z alto para que quede por encima de dolls/wordmark) */}
         <m.div variants={fadeUp} whileTap={{ scale: 0.97 }} className="relative z-60">
           <Link
-            href="/catalogo"
+            href="/pelucas"
             className="cursor-pointer z-auto group relative inline-flex items-center gap-3 rounded-xl border border-neon bg-noir/60 px-4 font-heading text-sm font-bold uppercase tracking-widest text-blanco shadow-[0_0_22px_-4px_rgba(255,47,146,0.7)] transition-all hover:bg-neon/50 hover:text-noir hover:shadow-[0_0_30px_-2px_rgba(255,47,146,0.9)]"
           >
             Comprar ahora

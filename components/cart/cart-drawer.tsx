@@ -131,9 +131,9 @@ export function CartDrawer() {
                 <p className="font-heading uppercase tracking-wide text-humo">
                   Tu carrito está vacío
                 </p>
-                <Link href="/catalogo" onClick={close}>
+                <Link href="/pelucas" onClick={close}>
                   <Button variant="outline" size="sm">
-                    Ver catálogo
+                    Ver pelucas
                   </Button>
                 </Link>
               </div>

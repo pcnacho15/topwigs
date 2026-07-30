@@ -6,6 +6,7 @@ import type {
   PublicProduct,
   PublicCategory,
   PublicColor,
+  ProductTipo,
 } from "@/lib/public-product";
 
 type ProductWithCategory = Product & {
@@ -42,6 +43,18 @@ export const getPublicProducts = cache(async (): Promise<PublicProduct[]> => {
   return rows.map(mapProduct);
 });
 
+/** Productos activos de un tipo ("peluca" | "lente"): un catálogo por tipo. */
+export const getPublicProductsByTipo = cache(
+  async (tipo: ProductTipo): Promise<PublicProduct[]> => {
+    const rows = await prisma.product.findMany({
+      where: { activo: true, tipo },
+      orderBy: { createdAt: "desc" },
+      include: { category: { select: { slug: true, nombre: true } } },
+    });
+    return rows.map(mapProduct);
+  },
+);
+
 export const getPublicProductBySlug = cache(
   async (slug: string): Promise<PublicProduct | null> => {
     const p = await prisma.product.findFirst({
@@ -65,6 +78,23 @@ export const getPublicCategories = cache(
     const rows: Pick<Category, "id" | "slug" | "nombre">[] =
       await prisma.category.findMany({
         where: { activa: true },
+        orderBy: { orden: "asc" },
+        select: { id: true, slug: true, nombre: true },
+      });
+    return rows;
+  },
+);
+
+/**
+ * Categorías que tienen al menos un producto activo del tipo dado. Así cada
+ * catálogo muestra solo sus propios filtros sin necesidad de marcar el tipo
+ * en la categoría (el tipo vive en el producto).
+ */
+export const getPublicCategoriesByTipo = cache(
+  async (tipo: ProductTipo): Promise<PublicCategory[]> => {
+    const rows: Pick<Category, "id" | "slug" | "nombre">[] =
+      await prisma.category.findMany({
+        where: { activa: true, products: { some: { activo: true, tipo } } },
         orderBy: { orden: "asc" },
         select: { id: true, slug: true, nombre: true },
       });

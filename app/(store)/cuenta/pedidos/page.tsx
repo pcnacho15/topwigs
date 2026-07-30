@@ -59,7 +59,7 @@ export default async function MisPedidosPage() {
           <p className="font-heading uppercase tracking-wide text-humo">
             Aún no tienes pedidos
           </p>
-          <Link href="/catalogo">
+          <Link href="/pelucas">
             <Button variant="outline">Ir al catálogo</Button>
           </Link>
         </div>

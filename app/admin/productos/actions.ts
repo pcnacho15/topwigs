@@ -14,7 +14,9 @@ const json = (v: unknown) => v as Prisma.InputJsonValue;
 function revalidate() {
   revalidatePath("/admin/productos");
   revalidatePath("/admin");
-  revalidatePath("/catalogo");
+  revalidatePath("/pelucas");
+  revalidatePath("/lentes");
+  revalidatePath("/"); // categorías destacadas (dependen de los productos)
 }
 
 function toData(d: import("@/lib/schemas/product").ProductInput) {

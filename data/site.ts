@@ -1,8 +1,11 @@
 /** Configuración global del sitio (mock de Fase 1). */
 
+import { CATALOGOS } from "@/data/catalogos";
+
 export const NAV_LINKS = [
   { href: "/", label: "Inicio" },
-  { href: "/catalogo", label: "Catálogo" },
+  { href: CATALOGOS.peluca.href, label: CATALOGOS.peluca.label },
+  { href: CATALOGOS.lente.href, label: CATALOGOS.lente.label },
   { href: "/nuevos", label: "Nuevos" },
   { href: "/nosotras", label: "Sobre TOPWIGS" },
   { href: "/contacto", label: "Contacto" },

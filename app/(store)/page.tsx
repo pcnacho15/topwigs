@@ -22,7 +22,8 @@ import {
 } from "@/components/icons";
 import { LENTES } from "@/data/lentes";
 import { SOCIALS, TAGLINE } from "@/data/site";
-import { getPublicCategories } from "@/lib/queries/catalog";
+import { CATALOGOS } from "@/data/catalogos";
+import { getPublicCategoriesByTipo } from "@/lib/queries/catalog";
 
 /** Doll asignada a cada categoría (por slug). */
 const CATEGORIA_IMG: Record<string, string> = {
@@ -54,7 +55,8 @@ const SOCIAL_ROWS = [
 ];
 
 export default async function Home() {
-  const categorias = await getPublicCategories();
+  // Las tarjetas destacadas son categorías de pelucas (enlazan a /pelucas).
+  const categorias = await getPublicCategoriesByTipo("peluca");
 
   return (
     <main className="flex flex-1 flex-col">
@@ -127,7 +129,7 @@ export default async function Home() {
             ))}
           </Stagger>
           <div className="flex justify-center">
-            <Link href="/catalogo">
+            <Link href={CATALOGOS.lente.href}>
               <Button variant="outline">Ver todos</Button>
             </Link>
           </div>

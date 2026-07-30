@@ -28,7 +28,7 @@ export default function CheckoutPage() {
         <p className="font-heading text-lg uppercase tracking-wide text-humo">
           Tu carrito está vacío
         </p>
-        <Link href="/catalogo">
+        <Link href="/pelucas">
           <Button variant="outline">Ir al catálogo</Button>
         </Link>
       </main>

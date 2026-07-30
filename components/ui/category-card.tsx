@@ -2,17 +2,24 @@ import Link from "next/link";
 import Image from "next/image";
 import { Card } from "@/components/ui/card";
 import { Heart } from "@/components/icons";
+import { CATALOGOS } from "@/data/catalogos";
 
 /** Tarjeta de categoría destacada (Home). Enlaza al catálogo filtrado. */
 export function CategoryCard({
   categoria,
   image,
+  catalogo = CATALOGOS.peluca.href,
 }: {
   categoria: { slug: string; nombre: string };
   image?: string;
+  /** Catálogo al que enlaza (`/pelucas` por defecto). */
+  catalogo?: string;
 }) {
   return (
-    <Link href={`/catalogo?categoria=${categoria.slug}`} className="group block">
+    <Link
+      href={`${catalogo}?categoria=${categoria.slug}`}
+      className="group block"
+    >
       <Card className="overflow-hidden">
         <div className="relative aspect-[3/4] bg-[radial-gradient(120%_100%_at_50%_0%,rgba(186,43,226,0.28),rgba(255,47,146,0.12)_45%,#0a0a0d_82%)]">
           {image ? (
