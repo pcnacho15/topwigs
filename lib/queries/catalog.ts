@@ -75,11 +75,11 @@ export const getAllProductSlugs = cache(async (): Promise<string[]> => {
 
 export const getPublicCategories = cache(
   async (): Promise<PublicCategory[]> => {
-    const rows: Pick<Category, "id" | "slug" | "nombre">[] =
+    const rows: Pick<Category, "id" | "slug" | "nombre" | "imagen">[] =
       await prisma.category.findMany({
         where: { activa: true },
         orderBy: { orden: "asc" },
-        select: { id: true, slug: true, nombre: true },
+        select: { id: true, slug: true, nombre: true, imagen: true },
       });
     return rows;
   },
@@ -92,11 +92,11 @@ export const getPublicCategories = cache(
  */
 export const getPublicCategoriesByTipo = cache(
   async (tipo: ProductTipo): Promise<PublicCategory[]> => {
-    const rows: Pick<Category, "id" | "slug" | "nombre">[] =
+    const rows: Pick<Category, "id" | "slug" | "nombre" | "imagen">[] =
       await prisma.category.findMany({
         where: { activa: true, products: { some: { activo: true, tipo } } },
         orderBy: { orden: "asc" },
-        select: { id: true, slug: true, nombre: true },
+        select: { id: true, slug: true, nombre: true, imagen: true },
       });
     return rows;
   },

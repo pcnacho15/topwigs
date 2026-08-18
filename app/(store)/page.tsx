@@ -25,14 +25,6 @@ import { SOCIALS, TAGLINE } from "@/data/site";
 import { CATALOGOS } from "@/data/catalogos";
 import { getPublicCategoriesByTipo } from "@/lib/queries/catalog";
 
-/** Doll asignada a cada categoría (por slug). */
-const CATEGORIA_IMG: Record<string, string> = {
-  rubias: "/modelos/modelo3.png",
-  negras: "/modelos/modelo1.png",
-  fantasia: "/modelos/modelo5.png",
-  cosplay: "/modelos/modelo4.png",
-};
-
 const FEATURES = [
   { Icon: Fire, titulo: "Fibra seminatural", texto: "Apariencia real y suave al tacto." },
   {
@@ -72,7 +64,7 @@ export default async function Home() {
           <Stagger className="grid grid-cols-2 gap-4 md:grid-cols-4">
             {categorias.map((c) => (
               <StaggerItem key={c.slug}>
-                <CategoryCard categoria={c} image={CATEGORIA_IMG[c.slug]} />
+                <CategoryCard categoria={c} image={c.imagen ?? undefined} />
               </StaggerItem>
             ))}
           </Stagger>

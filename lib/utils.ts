@@ -16,3 +16,13 @@ export function slugify(text: string): string {
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "");
 }
+
+const dateFormatter = new Intl.DateTimeFormat("es-CO", {
+  dateStyle: "medium",
+  timeStyle: "short",
+});
+
+/** Formatea una fecha: 2026-08-17T14:30 → "17 ago 2026, 2:30 p.m." */
+export function formatDate(value: Date): string {
+  return dateFormatter.format(value);
+}

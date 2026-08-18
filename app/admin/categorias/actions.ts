@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { requireAdmin } from "@/lib/auth-guard";
+import { cloudinary, cloudinaryConfigured } from "@/lib/cloudinary";
 import { categorySchema } from "@/lib/schemas/category";
 
 export type ActionResult = { ok: true } | { ok: false; error: string };
@@ -67,4 +68,26 @@ export async function deleteCategoria(id: string): Promise<ActionResult> {
   await prisma.category.delete({ where: { id } });
   revalidate();
   return { ok: true };
+}
+
+/** Firma una subida directa a Cloudinary para la imagen de portada de una categoría. */
+export async function signCategoryImageUpload() {
+  await requireAdmin();
+  if (!cloudinaryConfigured()) {
+    return { ok: false as const, error: "cloudinary_missing" };
+  }
+  const timestamp = Math.round(Date.now() / 1000);
+  const folder = "topwigs/categorias";
+  const signature = cloudinary.utils.api_sign_request(
+    { folder, timestamp },
+    process.env.CLOUDINARY_API_SECRET as string,
+  );
+  return {
+    ok: true as const,
+    signature,
+    timestamp,
+    folder,
+    apiKey: process.env.CLOUDINARY_API_KEY as string,
+    cloudName: process.env.CLOUDINARY_CLOUD_NAME as string,
+  };
 }

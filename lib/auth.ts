@@ -33,5 +33,15 @@ export const auth = betterAuth({
     expiresIn: 60 * 60 * 24 * 7, // 7 días
     updateAge: 60 * 60 * 24, // refresca cada día
   },
+  account: {
+    accountLinking: {
+      enabled: true,
+      // Google verifica los emails de sus usuarios, así que confiamos en él
+      // para vincular con una cuenta existente aunque el registro por
+      // email/password no tenga verificación de email implementada.
+      trustedProviders: ["google"],
+      requireLocalEmailVerified: false,
+    },
+  },
   plugins: [admin()],
 });

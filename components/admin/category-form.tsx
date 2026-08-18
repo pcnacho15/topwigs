@@ -6,6 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { categorySchema, type CategoryInput } from "@/lib/schemas/category";
 import { createCategoria, updateCategoria } from "@/app/admin/categorias/actions";
+import { CategoryImageUploader } from "@/components/admin/category-image-uploader";
 import {
   Form,
   FormField,
@@ -32,7 +33,8 @@ export function CategoryForm({ mode, id, initial }: Props) {
 
   const form = useForm<CategoryInput>({
     resolver: zodResolver(categorySchema),
-    defaultValues: initial ?? { nombre: "", slug: "", orden: 0, activa: true },
+    defaultValues:
+      initial ?? { nombre: "", slug: "", imagen: null, orden: 0, activa: true },
   });
 
   async function onSubmit(values: CategoryInput) {
@@ -86,6 +88,26 @@ export function CategoryForm({ mode, id, initial }: Props) {
                 <Input {...field} placeholder="fantasia" />
               </FormControl>
               <FormDescription>Se usa en la URL del catálogo.</FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="imagen"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Imagen de portada</FormLabel>
+              <FormControl>
+                <CategoryImageUploader
+                  value={field.value ?? null}
+                  onChange={field.onChange}
+                />
+              </FormControl>
+              <FormDescription>
+                Se muestra en la tarjeta de categoría del Home.
+              </FormDescription>
               <FormMessage />
             </FormItem>
           )}

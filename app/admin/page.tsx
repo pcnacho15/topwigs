@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { DollarSign, ShoppingBag, Package, Tags } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { formatCOP } from "@/components/ui/price";
+import { ORDER_STATUS_LABEL, ORDER_STATUS_COLOR } from "@/lib/orders";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/shadcn/card";
 import {
   Table,
@@ -13,14 +15,6 @@ import {
 } from "@/components/shadcn/table";
 
 export const metadata: Metadata = { title: "Dashboard" };
-
-const STATUS_LABEL: Record<string, string> = {
-  PENDING: "Pendiente",
-  APPROVED: "Aprobado",
-  DECLINED: "Rechazado",
-  VOIDED: "Anulado",
-  ERROR: "Error",
-};
 
 export default async function AdminDashboard() {
   const [productCount, categoryCount, orderCount, agg, recentOrders] =
@@ -65,8 +59,11 @@ export default async function AdminDashboard() {
       </div>
 
       <Card>
-        <CardHeader>
+        <CardHeader className="flex-row items-center justify-between">
           <CardTitle>Pedidos recientes</CardTitle>
+          <Link href="/admin/pedidos" className="text-xs text-humo hover:text-neon">
+            Ver todos
+          </Link>
         </CardHeader>
         <CardContent>
           {recentOrders.length > 0 ? (
@@ -84,7 +81,11 @@ export default async function AdminDashboard() {
                   <TableRow key={o.id}>
                     <TableCell className="font-mono text-xs">{o.reference}</TableCell>
                     <TableCell>{o.customerName}</TableCell>
-                    <TableCell>{STATUS_LABEL[o.status] ?? o.status}</TableCell>
+                    <TableCell>
+                      <span className={ORDER_STATUS_COLOR[o.status] ?? "text-humo"}>
+                        {ORDER_STATUS_LABEL[o.status] ?? o.status}
+                      </span>
+                    </TableCell>
                     <TableCell className="text-right font-semibold">
                       {formatCOP(o.totalCop)}
                     </TableCell>

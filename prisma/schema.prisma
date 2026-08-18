@@ -16,6 +16,7 @@ model Category {
   id        String    @id @default(cuid())
   slug      String    @unique
   nombre    String
+  imagen    String? // URL de portada (Cloudinary), mostrada en Home/catálogo
   orden     Int       @default(0)
   activa    Boolean   @default(true)
   products  Product[]

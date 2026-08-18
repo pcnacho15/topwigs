@@ -15,6 +15,7 @@ export interface PublicCategory {
   id: string;
   slug: string;
   nombre: string;
+  imagen: string | null;
 }
 
 export interface PublicProduct {

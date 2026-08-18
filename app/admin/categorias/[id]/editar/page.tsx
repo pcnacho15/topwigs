@@ -25,6 +25,7 @@ export default async function EditarCategoriaPage({
         initial={{
           nombre: categoria.nombre,
           slug: categoria.slug,
+          imagen: categoria.imagen,
           orden: categoria.orden,
           activa: categoria.activa,
         }}
