@@ -84,7 +84,10 @@ export async function applyWompiTransaction(tx: WompiTransactionStatus): Promise
 
   if (isTerminal && order.emailSentStatus !== status) {
     const claimed = await prisma.order.updateMany({
-      where: { reference: tx.reference, emailSentStatus: { not: status } },
+      where: {
+        reference: tx.reference,
+        OR: [{ emailSentStatus: null }, { emailSentStatus: { not: status } }],
+      },
       data: { status, wompiTransactionId: tx.id, emailSentStatus: status },
     });
     shouldSendEmail = claimed.count > 0;
