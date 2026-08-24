@@ -8,7 +8,7 @@ export const NAV_LINKS = [
   { href: CATALOGOS.lente.href, label: CATALOGOS.lente.label },
   { href: "/nuevos", label: "Nuevos" },
   { href: "/nosotras", label: "Sobre TOPWIGS" },
-  { href: "/contacto", label: "Contacto" },
+  // { href: "/contacto", label: "Contacto" },
 ] as const;
 
 export const SOCIALS = {

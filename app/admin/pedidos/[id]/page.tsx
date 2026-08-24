@@ -105,6 +105,26 @@ export default async function PedidoDetallePage({
 
           <Card>
             <CardHeader>
+              <CardTitle>Dirección de envío</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-1 text-sm">
+              <p className="text-blanco">{pedido.direccion || "—"}</p>
+              <p className="text-humo">
+                {[pedido.barrio, pedido.municipio, pedido.departamento]
+                  .filter(Boolean)
+                  .join(", ") || "—"}
+              </p>
+              {pedido.indicaciones ? (
+                <p className="pt-1 text-xs text-humo/80">
+                  <span className="font-semibold text-humo">Indicaciones: </span>
+                  {pedido.indicaciones}
+                </p>
+              ) : null}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
               <CardTitle>Pago</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2 text-sm">

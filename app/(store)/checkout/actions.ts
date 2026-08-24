@@ -14,6 +14,11 @@ interface Customer {
   nombre: string;
   email: string;
   telefono: string;
+  direccion: string;
+  departamento: string;
+  municipio: string;
+  barrio: string;
+  indicaciones: string;
 }
 
 type Result =
@@ -88,6 +93,11 @@ export async function createWompiCheckout(input: {
       customerName: input.customer.nombre,
       customerEmail: input.customer.email,
       customerPhone: input.customer.telefono,
+      direccion: input.customer.direccion,
+      departamento: input.customer.departamento,
+      municipio: input.customer.municipio,
+      barrio: input.customer.barrio,
+      indicaciones: input.customer.indicaciones || null,
       items: json(snapshot),
       totalCop,
       status: "PENDING",

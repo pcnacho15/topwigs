@@ -24,6 +24,7 @@ import { LENTES } from "@/data/lentes";
 import { SOCIALS, TAGLINE } from "@/data/site";
 import { CATALOGOS } from "@/data/catalogos";
 import { getPublicCategoriesByTipo } from "@/lib/queries/catalog";
+import { Footer } from "@/components/layout/footer";
 
 const FEATURES = [
   { Icon: Fire, titulo: "Fibra seminatural", texto: "Apariencia real y suave al tacto." },
@@ -64,7 +65,10 @@ export default async function Home() {
           <Stagger className="grid grid-cols-2 gap-4 md:grid-cols-4">
             {categorias.map((c) => (
               <StaggerItem key={c.slug}>
-                <CategoryCard categoria={c} image={c.imagen ?? undefined} />
+                <CategoryCard
+                  categoria={c}
+                  image={c.imagen ?? undefined}
+                />
               </StaggerItem>
             ))}
           </Stagger>
@@ -98,7 +102,9 @@ export default async function Home() {
           <Reveal>
             <div className="flex flex-wrap items-center justify-center gap-3">
               <Badge>Nuevo</Badge>
-              <SectionHeading centered={false}>Lentes de contacto</SectionHeading>
+              <SectionHeading centered={false}>
+                Lentes de contacto
+              </SectionHeading>
             </div>
           </Reveal>
           <Stagger className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
@@ -115,7 +121,10 @@ export default async function Home() {
                   <h3 className="font-heading text-xs font-bold uppercase tracking-wide">
                     {lente.nombre}
                   </h3>
-                  <PriceTag value={lente.precio} className="text-sm" />
+                  <PriceTag
+                    value={lente.precio}
+                    className="text-sm"
+                  />
                 </Card>
               </StaggerItem>
             ))}
@@ -144,8 +153,8 @@ export default async function Home() {
                 <SectionHeading centered={false}>Somos TOPWIGS</SectionHeading>
                 <p className="text-humo">
                   Una marca creada por y para amantes del cambio, la moda y la
-                  expresión. Creemos que quien cambia su look, cambia su energía,
-                  su vibra, su día.
+                  expresión. Creemos que quien cambia su look, cambia su
+                  energía, su vibra, su día.
                 </p>
                 <p className="font-pixel text-[10px] uppercase text-neon">
                   Thanks for being here!
@@ -184,25 +193,28 @@ export default async function Home() {
           <Reveal>
             <RetroWindow title="contacto.exe">
               <div className="space-y-5 p-6 sm:p-8">
-              <div>
-                <h2 className="font-heading text-xl font-extrabold uppercase text-glow">
-                  ¡Hablemos!
-                </h2>
-                <p className="mt-1 text-sm text-humo">
-                  ¿Tienes dudas, sugerencias o quieres hacer un pedido
-                  personalizado? Escríbenos.
-                </p>
+                <div>
+                  <h2 className="font-heading text-xl font-extrabold uppercase text-glow">
+                    ¡Hablemos!
+                  </h2>
+                  <p className="mt-1 text-sm text-humo">
+                    ¿Tienes dudas, sugerencias o quieres hacer un pedido
+                    personalizado? Escríbenos.
+                  </p>
+                </div>
+                <ContactForm />
               </div>
-              <ContactForm />
-            </div>
             </RetroWindow>
           </Reveal>
         </section>
 
         <Reveal>
-          <p className="font-pixel text-[10px] uppercase text-humo/60">{TAGLINE}</p>
+          <p className="font-pixel text-[10px] uppercase text-humo/60">
+            {TAGLINE}
+          </p>
         </Reveal>
       </div>
+      <Footer />
     </main>
   );
 }

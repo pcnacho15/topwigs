@@ -57,6 +57,12 @@ model Order {
   customerName       String
   customerEmail      String
   customerPhone      String
+  direccion          String   @default("")
+  departamento       String   @default("")
+  municipio          String   @default("")
+  barrio             String   @default("")
+  indicaciones       String?
+  emailSentStatus    String? // último status para el que ya se envió correo (evita duplicados)
   items              Json // snapshot: {slug,nombre,precio,color,qty}[]
   totalCop           Int
   status             String   @default("PENDING") // PENDING|APPROVED|DECLINED|VOIDED|ERROR

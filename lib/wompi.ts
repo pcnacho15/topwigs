@@ -1,5 +1,6 @@
 import "server-only";
 import { prisma } from "@/lib/db";
+import { sendOrderStatusEmail } from "@/lib/email";
 
 /** Estados de transacción de Wompi, iguales a `Order.status`. */
 const VALID_STATUSES = new Set(["PENDING", "APPROVED", "DECLINED", "VOIDED", "ERROR"]);
@@ -73,12 +74,48 @@ export async function applyWompiTransaction(tx: WompiTransactionStatus): Promise
     return { ok: true, status: order.status };
   }
 
-  if (order.status !== status || order.wompiTransactionId !== tx.id) {
+  // Solo se envía correo la primera vez que el pedido llega a un estado
+  // terminal. `emailSentStatus` se reclama con un update condicional
+  // (updateMany + where) para que sea seguro si el webhook y la página de
+  // resultado llegan casi al mismo tiempo para la misma transacción: solo
+  // uno de los dos gana la carrera y termina enviando el correo.
+  const isTerminal = status !== "PENDING";
+  let shouldSendEmail = false;
+
+  if (isTerminal && order.emailSentStatus !== status) {
+    const claimed = await prisma.order.updateMany({
+      where: { reference: tx.reference, emailSentStatus: { not: status } },
+      data: { status, wompiTransactionId: tx.id, emailSentStatus: status },
+    });
+    shouldSendEmail = claimed.count > 0;
+  }
+
+  if (!shouldSendEmail && (order.status !== status || order.wompiTransactionId !== tx.id)) {
     await prisma.order.update({
       where: { reference: tx.reference },
       data: { status, wompiTransactionId: tx.id },
     });
   }
 
+  if (shouldSendEmail) {
+    const items = (order.items as unknown as OrderEmailItem[]) ?? [];
+    await sendOrderStatusEmail({
+      to: order.customerEmail,
+      customerName: order.customerName,
+      reference: order.reference,
+      totalCop: order.totalCop,
+      items,
+      status: status as "APPROVED" | "DECLINED" | "VOIDED" | "ERROR",
+    });
+  }
+
   return { ok: true, status };
+}
+
+interface OrderEmailItem {
+  slug: string;
+  nombre: string;
+  precio: number;
+  colorNombre: string | null;
+  qty: number;
 }

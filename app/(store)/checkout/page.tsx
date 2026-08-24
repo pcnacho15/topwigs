@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useCart } from "@/components/cart/cart-context";
 import { formatCOP } from "@/components/ui/price";
 import { Button } from "@/components/ui/button";
-import { Input, FieldLabel } from "@/components/ui/input";
+import { Input, FieldLabel, Textarea } from "@/components/ui/input";
 import { RetroWindow } from "@/components/ui/retro-window";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { HeartDrip } from "@/components/icons";
@@ -44,6 +44,11 @@ export default function CheckoutPage() {
       nombre: String(form.get("nombre") ?? ""),
       email: String(form.get("email") ?? ""),
       telefono: String(form.get("telefono") ?? ""),
+      direccion: String(form.get("direccion") ?? ""),
+      departamento: String(form.get("departamento") ?? ""),
+      municipio: String(form.get("municipio") ?? ""),
+      barrio: String(form.get("barrio") ?? ""),
+      indicaciones: String(form.get("indicaciones") ?? ""),
     };
 
     const res = await createWompiCheckout({
@@ -103,6 +108,41 @@ export default function CheckoutPage() {
               type="tel"
               required
               placeholder="+57 300 000 0000"
+            />
+          </div>
+
+          <h2 className="pt-2 font-heading text-lg font-bold uppercase tracking-wide">
+            Dirección de envío
+          </h2>
+          <div>
+            <FieldLabel htmlFor="direccion">Dirección exacta</FieldLabel>
+            <Input
+              id="direccion"
+              name="direccion"
+              required
+              placeholder="Calle 10 # 5-23, apto 301"
+            />
+          </div>
+          <div className="grid gap-5 sm:grid-cols-2">
+            <div>
+              <FieldLabel htmlFor="departamento">Departamento</FieldLabel>
+              <Input id="departamento" name="departamento" required placeholder="Antioquia" />
+            </div>
+            <div>
+              <FieldLabel htmlFor="municipio">Municipio / Ciudad</FieldLabel>
+              <Input id="municipio" name="municipio" required placeholder="Medellín" />
+            </div>
+          </div>
+          <div>
+            <FieldLabel htmlFor="barrio">Barrio</FieldLabel>
+            <Input id="barrio" name="barrio" required placeholder="El Poblado" />
+          </div>
+          <div>
+            <FieldLabel htmlFor="indicaciones">Indicaciones de entrega (opcional)</FieldLabel>
+            <Textarea
+              id="indicaciones"
+              name="indicaciones"
+              placeholder="Ej. casa color azul, portería principal, dejar con vecino si no hay nadie…"
             />
           </div>
 
