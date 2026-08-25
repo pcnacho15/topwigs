@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import type { PublicProduct } from "@/lib/public-product";
@@ -22,14 +22,31 @@ export function ProductDetail({ product }: { product: PublicProduct }) {
   const [qty, setQty] = useState(1);
   const [mediaIndex, setMediaIndex] = useState(0);
 
-  const media: Media[] = [
-    ...product.imagenes.map((url) => ({ type: "image" as const, url })),
-    ...product.videos.map((url) => ({ type: "video" as const, url })),
-  ];
   const activeColor = product.colores[color];
+
+  /**
+   * La galería muestra solo los medios asignados al color elegido. Si el
+   * producto no tiene colores, se usan los del producto completo; si el
+   * color no tiene nada asignado, la galería queda vacía (placeholder).
+   */
+  const media: Media[] = useMemo(() => {
+    const imagenes = activeColor ? activeColor.imagenes : product.imagenes;
+    const videos = activeColor ? activeColor.videos : product.videos;
+    return [
+      ...imagenes.map((url) => ({ type: "image" as const, url })),
+      ...videos.map((url) => ({ type: "video" as const, url })),
+    ];
+  }, [activeColor, product.imagenes, product.videos]);
+
   const activeCss = activeColor ? colorToCss(activeColor) : "#ff2f92";
   const desc = descuentoPct(product.precioCop, product.precioOfertaCop);
   const activeMedia = media[Math.min(mediaIndex, media.length - 1)];
+
+  /** Al cambiar de color la galería es otra: vuelve al primer medio. */
+  const handleColor = (i: number) => {
+    setColor(i);
+    setMediaIndex(0);
+  };
 
   const buildItem = () => ({
     slug: product.slug,
@@ -172,7 +189,7 @@ export function ProductDetail({ product }: { product: PublicProduct }) {
               {product.colores.map((c, i) => (
                 <button
                   key={`${c.nombre}-${i}`}
-                  onClick={() => setColor(i)}
+                  onClick={() => handleColor(i)}
                   aria-label={c.nombre}
                   aria-pressed={i === color}
                   className={cn(

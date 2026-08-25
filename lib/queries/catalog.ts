@@ -13,7 +13,28 @@ type ProductWithCategory = Product & {
   category: { slug: string; nombre: string };
 };
 
+/**
+ * Los colores guardados antes de que existiera la asignación de medios por
+ * color no traen `imagenes`/`videos`: se normalizan a arrays vacíos. Además
+ * se descartan URLs que ya no estén en la galería del producto (por si se
+ * borró un archivo sin pasar por el formulario del admin).
+ */
+function normalizeColores(
+  raw: unknown,
+  imagenes: string[],
+  videos: string[],
+): PublicColor[] {
+  if (!Array.isArray(raw)) return [];
+  return (raw as PublicColor[]).map((c) => ({
+    ...c,
+    imagenes: (c.imagenes ?? []).filter((u) => imagenes.includes(u)),
+    videos: (c.videos ?? []).filter((u) => videos.includes(u)),
+  }));
+}
+
 function mapProduct(p: ProductWithCategory): PublicProduct {
+  const imagenes = (p.imagenes as unknown as string[]) ?? [];
+  const videos = (p.videos as unknown as string[]) ?? [];
   return {
     id: p.id,
     slug: p.slug,
@@ -27,10 +48,10 @@ function mapProduct(p: ProductWithCategory): PublicProduct {
     reviews: p.reviews,
     nuevo: p.nuevo,
     agotado: !p.activo || p.stock <= 0,
-    colores: (p.colores as unknown as PublicColor[]) ?? [],
+    colores: normalizeColores(p.colores, imagenes, videos),
     features: (p.features as unknown as string[]) ?? [],
-    imagenes: (p.imagenes as unknown as string[]) ?? [],
-    videos: (p.videos as unknown as string[]) ?? [],
+    imagenes,
+    videos,
   };
 }
 

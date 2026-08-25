@@ -21,6 +21,16 @@ export default async function EditarProductoPage({
   ]);
   if (!producto) notFound();
 
+  const imagenes = producto.imagenes as unknown as string[];
+  const videos = producto.videos as unknown as string[];
+  // Los colores guardados antes de la asignación por color no traen
+  // `imagenes`/`videos`; el formulario los necesita como arrays.
+  const colores = (producto.colores as unknown as ColorSpec[]).map((c) => ({
+    ...c,
+    imagenes: (c.imagenes ?? []).filter((u) => imagenes.includes(u)),
+    videos: (c.videos ?? []).filter((u) => videos.includes(u)),
+  }));
+
   const initial: ProductInput = {
     nombre: producto.nombre,
     slug: producto.slug,
@@ -34,10 +44,10 @@ export default async function EditarProductoPage({
     nuevo: producto.nuevo,
     stock: producto.stock,
     activo: producto.activo,
-    colores: producto.colores as unknown as ColorSpec[],
+    colores,
     features: producto.features as unknown as string[],
-    imagenes: producto.imagenes as unknown as string[],
-    videos: producto.videos as unknown as string[],
+    imagenes,
+    videos,
   };
 
   return (

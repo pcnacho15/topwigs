@@ -31,6 +31,7 @@ import {
   SelectItem,
 } from "@/components/shadcn/select";
 import { MediaUploader } from "@/components/admin/media-uploader";
+import { MediaPicker } from "@/components/admin/media-picker";
 import { StringListEditor } from "@/components/admin/string-list-editor";
 import { slugify } from "@/lib/utils";
 
@@ -54,7 +55,9 @@ const EMPTY: ProductInput = {
   nuevo: false,
   stock: 0,
   activo: true,
-  colores: [{ nombre: "", tipo: "solid", from: "#ff2f92", to: null }],
+  colores: [
+    { nombre: "", tipo: "solid", from: "#ff2f92", to: null, imagenes: [], videos: [] },
+  ],
   features: [],
   imagenes: [],
   videos: [],
@@ -74,6 +77,24 @@ export function ProductForm({ mode, id, categorias, initial }: Props) {
 
   const colores = useFieldArray({ control: form.control, name: "colores" });
   const tipo = form.watch("tipo");
+  const imagenes = form.watch("imagenes");
+  const videos = form.watch("videos");
+
+  /**
+   * La galería es la fuente de los medios que cada color puede asignar: al
+   * quitar un archivo hay que soltarlo también de los colores que lo tenían,
+   * o el producto no pasaría la validación al guardar.
+   */
+  function setMedia(campo: "imagenes" | "videos", urls: string[]) {
+    form.setValue(campo, urls, { shouldDirty: true });
+    form.getValues("colores").forEach((c, i) => {
+      const asignadas = c[campo] ?? [];
+      const quedan = asignadas.filter((u) => urls.includes(u));
+      if (quedan.length !== asignadas.length) {
+        form.setValue(`colores.${i}.${campo}`, quedan, { shouldDirty: true });
+      }
+    });
+  }
 
   async function onSubmit(values: ProductInput) {
     setError(null);
@@ -242,37 +263,6 @@ export function ProductForm({ mode, id, categorias, initial }: Props) {
           </div>
         </Section>
 
-        {/* Colores */}
-        <Section title="Colores">
-          <div className="space-y-3">
-            {colores.fields.map((f, i) => (
-              <ColorRow
-                key={f.id}
-                index={i}
-                form={form}
-                onRemove={() => colores.remove(i)}
-                canRemove={colores.fields.length > 1}
-              />
-            ))}
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() =>
-                colores.append({
-                  nombre: "",
-                  tipo: "solid",
-                  from: "#ff2f92",
-                  to: null,
-                })
-              }
-            >
-              <Plus className="size-4" />
-              Agregar color
-            </Button>
-          </div>
-        </Section>
-
         {/* Features */}
         <Section title="Características">
           <FormField
@@ -302,7 +292,7 @@ export function ProductForm({ mode, id, categorias, initial }: Props) {
                 <FormControl>
                   <MediaUploader
                     value={field.value}
-                    onChange={field.onChange}
+                    onChange={(urls) => setMedia("imagenes", urls)}
                     resourceType="image"
                     tipo={tipo}
                   />
@@ -320,7 +310,7 @@ export function ProductForm({ mode, id, categorias, initial }: Props) {
                 <FormControl>
                   <MediaUploader
                     value={field.value}
-                    onChange={field.onChange}
+                    onChange={(urls) => setMedia("videos", urls)}
                     resourceType="video"
                     tipo={tipo}
                   />
@@ -328,6 +318,52 @@ export function ProductForm({ mode, id, categorias, initial }: Props) {
               </FormItem>
             )}
           />
+        </Section>
+
+        {/* Colores — va después de la galería porque cada color asigna
+            los medios ya subidos arriba. */}
+        <Section title="Colores">
+          <p className="-mt-2 text-xs text-humo/70">
+            En cada color marca las imágenes y videos que le corresponden: al
+            elegirlo en la tienda, la galería mostrará solo esos. Un color sin
+            nada marcado se ve sin fotos.
+          </p>
+          <div className="space-y-3">
+            {colores.fields.map((f, i) => (
+              <ColorRow
+                key={f.id}
+                index={i}
+                form={form}
+                imagenes={imagenes}
+                videos={videos}
+                onRemove={() => colores.remove(i)}
+                canRemove={colores.fields.length > 1}
+              />
+            ))}
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() =>
+                colores.append({
+                  nombre: "",
+                  tipo: "solid",
+                  from: "#ff2f92",
+                  to: null,
+                  imagenes: [],
+                  videos: [],
+                })
+              }
+            >
+              <Plus className="size-4" />
+              Agregar color
+            </Button>
+          </div>
+          {form.formState.errors.colores?.root ? (
+            <p className="text-sm text-red-500">
+              {form.formState.errors.colores.root.message}
+            </p>
+          ) : null}
         </Section>
 
         {/* Métricas + flags */}
@@ -471,11 +507,15 @@ function Section({
 function ColorRow({
   index,
   form,
+  imagenes,
+  videos,
   onRemove,
   canRemove,
 }: {
   index: number;
   form: ReturnType<typeof useForm<ProductInput>>;
+  imagenes: string[];
+  videos: string[];
   onRemove: () => void;
   canRemove: boolean;
 }) {
@@ -489,82 +529,129 @@ function ColorRow({
       : from;
 
   return (
-    <div className="flex flex-wrap items-end gap-3 rounded-md border border-linea p-3">
-      <span
-        className="size-10 shrink-0 rounded-full border border-linea"
-        style={{ background: preview }}
-        aria-hidden
-      />
-      <div className="min-w-32 flex-1">
-        <label className="mb-1 block text-xs text-humo">Nombre</label>
-        <Input {...form.register(`colores.${index}.nombre`)} placeholder="Rojo vino" />
-      </div>
-      <div>
-        <label className="mb-1 block text-xs text-humo">Tipo</label>
-        <Controller
-          control={form.control}
-          name={`colores.${index}.tipo`}
-          render={({ field }) => (
-            <Select
-              value={field.value}
-              onValueChange={(v) => {
-                field.onChange(v);
-                if (v === "gradient" && !form.getValues(`colores.${index}.to`)) {
-                  form.setValue(`colores.${index}.to`, "#ba2be2");
-                }
-                if (v === "solid") {
-                  form.setValue(`colores.${index}.to`, null);
-                }
-              }}
-            >
-              <SelectTrigger className="w-32">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="solid">Sólido</SelectItem>
-                <SelectItem value="gradient">Degradado</SelectItem>
-              </SelectContent>
-            </Select>
-          )}
+    <div className="space-y-3 rounded-md border border-linea p-3">
+      <div className="flex flex-wrap items-end gap-3">
+        <span
+          className="size-10 shrink-0 rounded-full border border-linea"
+          style={{ background: preview }}
+          aria-hidden
         />
-      </div>
-      <div>
-        <label className="mb-1 block text-xs text-humo">
-          {tipo === "gradient" ? "Desde" : "Color"}
-        </label>
-        <input
-          type="color"
-          {...form.register(`colores.${index}.from`)}
-          className="h-10 w-14 cursor-pointer rounded-md border border-linea bg-surface-1"
-        />
-      </div>
-      {tipo === "gradient" ? (
+        <div className="min-w-32 flex-1">
+          <label className="mb-1 block text-xs text-humo">Nombre</label>
+          <Input
+            {...form.register(`colores.${index}.nombre`)}
+            placeholder="Rojo vino"
+          />
+        </div>
         <div>
-          <label className="mb-1 block text-xs text-humo">Hasta</label>
+          <label className="mb-1 block text-xs text-humo">Tipo</label>
+          <Controller
+            control={form.control}
+            name={`colores.${index}.tipo`}
+            render={({ field }) => (
+              <Select
+                value={field.value}
+                onValueChange={(v) => {
+                  field.onChange(v);
+                  if (v === "gradient" && !form.getValues(`colores.${index}.to`)) {
+                    form.setValue(`colores.${index}.to`, "#ba2be2");
+                  }
+                  if (v === "solid") {
+                    form.setValue(`colores.${index}.to`, null);
+                  }
+                }}
+              >
+                <SelectTrigger className="w-32">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="solid">Sólido</SelectItem>
+                  <SelectItem value="gradient">Degradado</SelectItem>
+                </SelectContent>
+              </Select>
+            )}
+          />
+        </div>
+        <div>
+          <label className="mb-1 block text-xs text-humo">
+            {tipo === "gradient" ? "Desde" : "Color"}
+          </label>
           <input
             type="color"
-            value={to ?? "#ba2be2"}
-            onChange={(e) =>
-              form.setValue(`colores.${index}.to`, e.target.value, {
-                shouldDirty: true,
-              })
-            }
+            {...form.register(`colores.${index}.from`)}
             className="h-10 w-14 cursor-pointer rounded-md border border-linea bg-surface-1"
           />
         </div>
-      ) : null}
-      {canRemove ? (
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon"
-          onClick={onRemove}
-          className="text-humo hover:text-red-500"
-          aria-label="Quitar color"
-        >
-          <Trash2 className="size-4" />
-        </Button>
-      ) : null}
+        {tipo === "gradient" ? (
+          <div>
+            <label className="mb-1 block text-xs text-humo">Hasta</label>
+            <input
+              type="color"
+              value={to ?? "#ba2be2"}
+              onChange={(e) =>
+                form.setValue(`colores.${index}.to`, e.target.value, {
+                  shouldDirty: true,
+                })
+              }
+              className="h-10 w-14 cursor-pointer rounded-md border border-linea bg-surface-1"
+            />
+          </div>
+        ) : null}
+        {canRemove ? (
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            onClick={onRemove}
+            className="text-humo hover:text-red-500"
+            aria-label="Quitar color"
+          >
+            <Trash2 className="size-4" />
+          </Button>
+        ) : null}
+      </div>
+
+      {/* Medios de este color: se marcan sobre lo ya subido al producto. */}
+      <div className="space-y-3 border-t border-linea pt-3">
+        <div>
+          <label className="mb-1.5 block text-xs text-humo">
+            Imágenes de este color
+          </label>
+          <Controller
+            control={form.control}
+            name={`colores.${index}.imagenes`}
+            render={({ field }) => (
+              <MediaPicker
+                options={imagenes}
+                value={field.value ?? []}
+                onChange={field.onChange}
+                resourceType="image"
+                emptyHint="Sube imágenes en la sección «Imágenes» para poder asignarlas."
+              />
+            )}
+          />
+        </div>
+        {videos.length > 0 ? (
+          <div>
+            <label className="mb-1.5 block text-xs text-humo">
+              Videos de este color
+            </label>
+            <Controller
+              control={form.control}
+              name={`colores.${index}.videos`}
+              render={({ field }) => (
+                <MediaPicker
+                  options={videos}
+                  value={field.value ?? []}
+                  onChange={field.onChange}
+                  resourceType="video"
+                  emptyHint=""
+                />
+              )}
+            />
+          </div>
+        ) : null}
+      </div>
     </div>
   );
 }

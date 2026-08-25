@@ -40,6 +40,9 @@ async function main() {
           tipo: "solid",
           from: c.hex,
           to: null,
+          // El seed no carga media; se asigna desde el admin.
+          imagenes: [],
+          videos: [],
         })),
       ),
       features: json(w.features),

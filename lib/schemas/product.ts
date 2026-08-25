@@ -11,6 +11,11 @@ export const colorSpecSchema = z
     tipo: z.enum(["solid", "gradient"]),
     from: hex,
     to: hex.nullable(),
+    /** Subconjunto de `imagenes`/`videos` del producto que se muestra al
+     * elegir este color. Vacío = la galería queda sin medios. Los colores
+     * guardados antes de esta función se normalizan al leerlos. */
+    imagenes: z.array(z.url()),
+    videos: z.array(z.url()),
   })
   .refine((c) => c.tipo === "solid" || (c.to != null && c.to !== ""), {
     message: "El degradado necesita un segundo color",
@@ -39,14 +44,29 @@ export const productSchema = z
     activo: z.boolean(),
     colores: z.array(colorSpecSchema).min(1, "Agrega al menos un color"),
     features: z.array(z.string().min(1)),
-    imagenes: z.array(z.string().url()),
-    videos: z.array(z.string().url()),
+    imagenes: z.array(z.url()),
+    videos: z.array(z.url()),
   })
   .refine(
     (p) => p.precioOfertaCop == null || p.precioOfertaCop < p.precioCop,
     {
       message: "La oferta debe ser menor al precio",
       path: ["precioOfertaCop"],
+    },
+  )
+  // Un color solo puede apuntar a medios que sigan en la galería del
+  // producto (si se borra una imagen, el form limpia las asignaciones).
+  .refine(
+    (p) =>
+      p.colores.every(
+        (c) =>
+          c.imagenes.every((u) => p.imagenes.includes(u)) &&
+          c.videos.every((u) => p.videos.includes(u)),
+      ),
+    {
+      message:
+        "Un color tiene asignado un archivo que ya no está en la galería del producto",
+      path: ["colores"],
     },
   );
 

@@ -9,6 +9,9 @@ export interface PublicColor {
   tipo: "solid" | "gradient";
   from: string;
   to: string | null;
+  /** Medios propios de este color (subconjunto de los del producto). */
+  imagenes: string[];
+  videos: string[];
 }
 
 export interface PublicCategory {
