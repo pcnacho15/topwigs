@@ -54,6 +54,9 @@ export function ProductDetail({ product }: { product: PublicProduct }) {
     precio: product.precioOfertaCop ?? product.precioCop,
     colorNombre: activeColor?.nombre ?? "Único",
     colorHex: activeColor?.from ?? "#ff2f92",
+    // La línea del carrito es un color concreto: se prefiere su primera
+    // imagen y, si ese color no tiene ninguna, la primera del producto.
+    imagen: activeColor?.imagenes[0] ?? product.imagenes[0],
   });
   const handleAdd = () => {
     add(buildItem(), qty);

@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { m, AnimatePresence } from "motion/react";
 import { useCart } from "@/components/cart/cart-context";
 import { Button } from "@/components/ui/button";
@@ -28,7 +29,7 @@ export function CartDrawer() {
     <AnimatePresence>
       {isOpen ? (
         <m.div
-          className="fixed inset-0 z-[100]"
+          className="fixed inset-0 z-100"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -72,13 +73,26 @@ export function CartDrawer() {
               <ul className="flex-1 divide-y divide-linea overflow-y-auto px-5">
                 {items.map((item) => (
                   <li key={item.id} className="flex gap-4 py-4">
-                    <span
-                      className="size-16 shrink-0 rounded-goth border border-linea"
-                      style={{
-                        background: `radial-gradient(120% 100% at 50% 0%, ${item.colorHex}, #0a0a0d 82%)`,
-                      }}
-                      aria-hidden
-                    />
+                    {item.imagen ? (
+                      <div className="relative size-16 shrink-0 overflow-hidden rounded-goth border border-linea bg-surface-1">
+                        <Image
+                          src={item.imagen}
+                          alt={item.nombre}
+                          fill
+                          sizes="64px"
+                          className="object-cover"
+                        />
+                      </div>
+                    ) : (
+                      // Sin foto: se cae al swatch del color elegido.
+                      <span
+                        className="size-16 shrink-0 rounded-goth border border-linea"
+                        style={{
+                          background: `radial-gradient(120% 100% at 50% 0%, ${item.colorHex}, #0a0a0d 82%)`,
+                        }}
+                        aria-hidden
+                      />
+                    )}
                     <div className="flex flex-1 flex-col gap-1">
                       <div className="flex items-start justify-between gap-2">
                         <Link

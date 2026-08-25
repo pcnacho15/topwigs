@@ -18,6 +18,9 @@ export interface CartItem {
   precio: number; // COP unitario
   colorNombre: string;
   colorHex: string;
+  /** Portada de la línea. Opcional: los carritos guardados antes de este
+   * campo no la traen y caen al swatch de color. */
+  imagen?: string;
   qty: number;
 }
 

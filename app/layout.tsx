@@ -6,7 +6,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: {
-    default: "TOPWIGS · Pelucas góticas y de fantasía",
+    default: "TOPWIGS · Pelucas - Lentes y más",
     template: "%s · TOPWIGS",
   },
   description:
