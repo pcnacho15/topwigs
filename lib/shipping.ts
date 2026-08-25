@@ -3,4 +3,4 @@
  * el país, incluida Medellín. Único lugar donde vive este número: si el
  * flete cambia, se actualiza aquí.
  */
-export const SHIPPING_COST_COP = 17000;
+export const SHIPPING_COST_COP = 18500;
