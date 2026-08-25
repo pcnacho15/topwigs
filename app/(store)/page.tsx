@@ -19,6 +19,7 @@ import {
   Instagram,
   TikTok,
   WhatsApp,
+  Sparkle,
 } from "@/components/icons";
 import { LENTES } from "@/data/lentes";
 import { SOCIALS, TAGLINE } from "@/data/site";
@@ -27,7 +28,11 @@ import { getPublicCategoriesByTipo } from "@/lib/queries/catalog";
 import { Footer } from "@/components/layout/footer";
 
 const FEATURES = [
-  { Icon: Fire, titulo: "Fibra seminatural", texto: "Apariencia real y suave al tacto." },
+  {
+    Icon: Fire,
+    titulo: "Fibra seminatural",
+    texto: "Apariencia real y suave al tacto.",
+  },
   {
     Icon: Thermometer,
     titulo: "Resistente al calor",
@@ -38,13 +43,32 @@ const FEATURES = [
     titulo: "Envíos a toda Colombia",
     texto: "Recibe tu pedido en cualquier parte del país.",
   },
-  { Icon: Mask, titulo: "Looks para diario y cosplay", texto: "Para cada versión de ti." },
+  {
+    Icon: Mask,
+    titulo: "Looks para diario y cosplay",
+    texto: "Para cada versión de ti.",
+  },
 ];
 
 const SOCIAL_ROWS = [
-  { id: "instagram", Icon: Instagram, texto: SOCIALS.instagram.handle, href: SOCIALS.instagram.href },
-  { id: "tiktok", Icon: TikTok, texto: SOCIALS.tiktok.handle, href: SOCIALS.tiktok.href },
-  { id: "whatsapp", Icon: WhatsApp, texto: SOCIALS.whatsapp.numero, href: SOCIALS.whatsapp.href },
+  {
+    id: "instagram",
+    Icon: Instagram,
+    texto: SOCIALS.instagram.handle,
+    href: SOCIALS.instagram.href,
+  },
+  {
+    id: "tiktok",
+    Icon: TikTok,
+    texto: SOCIALS.tiktok.handle,
+    href: SOCIALS.tiktok.href,
+  },
+  {
+    id: "whatsapp",
+    Icon: WhatsApp,
+    texto: SOCIALS.whatsapp.numero,
+    href: SOCIALS.whatsapp.href,
+  },
 ];
 
 export default async function Home() {
@@ -152,16 +176,29 @@ export default async function Home() {
               <div className="space-y-4">
                 <SectionHeading centered={false}>Somos TOPWIGS</SectionHeading>
                 <p className="text-humo">
-                  Una marca creada por y para amantes del cambio, la moda y la
-                  expresión. Creemos que quien cambia su look, cambia su
-                  energía, su vibra, su día.
+                  Top Wigs nace para todas las personas que aman expresarse,
+                  cambiar de look y sentirse increíbles sin miedo. <br /> Somos
+                  una tienda especializada en pelucas, lentes de contacto y
+                  accesorios de belleza, seleccionados para que puedas encontrar
+                  ese look que tanto buscas y hacerlo parte de tu día a día.{" "}
+                  <br /> Creemos que una peluca no tiene que ser solo para una
+                  ocasión especial. Puedes usarla todos los días, experimentar
+                  con diferentes estilos y ser quien quieras ser. En Top Wigs
+                  nos enfocamos en ofrecer productos con estilo, variedad y
+                  calidad, pero también en crear una experiencia de compra
+                  cercana y confiable. <br /> <br />
+                  <span className="flex items-center font-heading text-base font-extrabold uppercase tracking-wide text-glow">
+                    Tu estilo. Tu esencia. Tu momento. <br /> Top Wigs — Brilla
+                    sin miedo
+                  </span>
                 </p>
+
                 <p className="font-pixel text-[10px] uppercase text-neon">
                   Thanks for being here!
                 </p>
-                <Link href="/nosotras">
+                {/* <Link href="/nosotras">
                   <Button variant="ghost">Leer más</Button>
-                </Link>
+                </Link> */}
               </div>
             </div>
           </RetroWindow>
