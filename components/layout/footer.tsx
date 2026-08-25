@@ -7,7 +7,7 @@ const socialLinks = [
   { key: "ig", href: SOCIALS.instagram.href, label: "Instagram", Icon: Instagram },
   { key: "tt", href: SOCIALS.tiktok.href, label: "TikTok", Icon: TikTok },
   { key: "wa", href: SOCIALS.whatsapp.href, label: "WhatsApp", Icon: WhatsApp },
-  { key: "mail", href: SOCIALS.email.href, label: "Correo", Icon: Mail },
+  // { key: "mail", href: SOCIALS.email.href, label: "Correo", Icon: Mail },
 ];
 
 export function Footer() {
@@ -60,7 +60,7 @@ export function Footer() {
           <ul className="space-y-2 text-sm text-humo">
             <li>{SOCIALS.instagram.handle}</li>
             <li>{SOCIALS.whatsapp.numero}</li>
-            <li>{SOCIALS.email.direccion}</li>
+            {/* <li>{SOCIALS.email.direccion}</li> */}
           </ul>
         </div>
       </div>

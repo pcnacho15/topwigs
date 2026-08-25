@@ -37,7 +37,8 @@ model Product {
   rating          Float    @default(0)
   reviews         Int      @default(0)
   nuevo           Boolean  @default(false)
-  activo          Boolean  @default(true)
+  stock           Int      @default(0) // unidades disponibles
+  activo          Boolean  @default(true) // disponible para la venta (si es false o stock=0, se muestra "agotado" pero sigue visible)
   // Estructuras flexibles (se normalizan si hace falta filtrar):
   colores         Json     @default("[]") // {nombre,tipo:"solid"|"gradient",from,to}[]
   features        Json     @default("[]") // string[]

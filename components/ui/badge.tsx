@@ -1,7 +1,7 @@
 import type { HTMLAttributes } from "react";
 import { cn } from "@/lib/utils";
 
-type Tone = "neon" | "violeta" | "outline";
+type Tone = "neon" | "violeta" | "outline" | "agotado";
 
 interface BadgeProps extends HTMLAttributes<HTMLSpanElement> {
   tone?: Tone;
@@ -11,6 +11,7 @@ const tones: Record<Tone, string> = {
   neon: "bg-neon text-noir",
   violeta: "bg-violeta text-blanco",
   outline: "border border-neon/60 text-neon",
+  agotado: "border border-linea bg-noir/80 text-humo",
 };
 
 /** Etiqueta corta: filtros, "NUEVO", categorías. */

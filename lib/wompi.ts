@@ -74,13 +74,13 @@ export async function applyWompiTransaction(tx: WompiTransactionStatus): Promise
     return { ok: true, status: order.status };
   }
 
-  // Solo se envía correo la primera vez que el pedido llega a un estado
-  // terminal. `emailSentStatus` se reclama con un update condicional
-  // (updateMany + where) para que sea seguro si el webhook y la página de
-  // resultado llegan casi al mismo tiempo para la misma transacción: solo
-  // uno de los dos gana la carrera y termina enviando el correo.
+  // El correo y el descuento de inventario solo deben pasar la primera vez
+  // que el pedido llega a un estado terminal. `emailSentStatus` se reclama
+  // con un update condicional (updateMany + where) para que sea seguro si
+  // el webhook y la página de resultado llegan casi al mismo tiempo para
+  // la misma transacción: solo uno de los dos gana la carrera.
   const isTerminal = status !== "PENDING";
-  let shouldSendEmail = false;
+  let isNewTerminalTransition = false;
 
   if (isTerminal && order.emailSentStatus !== status) {
     const claimed = await prisma.order.updateMany({
@@ -90,18 +90,24 @@ export async function applyWompiTransaction(tx: WompiTransactionStatus): Promise
       },
       data: { status, wompiTransactionId: tx.id, emailSentStatus: status },
     });
-    shouldSendEmail = claimed.count > 0;
+    isNewTerminalTransition = claimed.count > 0;
   }
 
-  if (!shouldSendEmail && (order.status !== status || order.wompiTransactionId !== tx.id)) {
+  if (
+    !isNewTerminalTransition &&
+    (order.status !== status || order.wompiTransactionId !== tx.id)
+  ) {
     await prisma.order.update({
       where: { reference: tx.reference },
       data: { status, wompiTransactionId: tx.id },
     });
   }
 
-  if (shouldSendEmail) {
+  if (isNewTerminalTransition) {
     const items = (order.items as unknown as OrderEmailItem[]) ?? [];
+    if (status === "APPROVED") {
+      await decrementStock(items);
+    }
     await sendOrderStatusEmail({
       to: order.customerEmail,
       customerName: order.customerName,
@@ -115,6 +121,21 @@ export async function applyWompiTransaction(tx: WompiTransactionStatus): Promise
   }
 
   return { ok: true, status };
+}
+
+/** Descuenta del inventario las unidades vendidas en un pedido aprobado. */
+async function decrementStock(items: OrderEmailItem[]): Promise<void> {
+  for (const item of items) {
+    const product = await prisma.product.findUnique({
+      where: { slug: item.slug },
+      select: { stock: true },
+    });
+    if (!product) continue;
+    await prisma.product.update({
+      where: { slug: item.slug },
+      data: { stock: Math.max(0, product.stock - item.qty) },
+    });
+  }
 }
 
 interface OrderEmailItem {

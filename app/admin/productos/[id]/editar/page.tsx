@@ -32,6 +32,7 @@ export default async function EditarProductoPage({
     rating: producto.rating,
     reviews: producto.reviews,
     nuevo: producto.nuevo,
+    stock: producto.stock,
     activo: producto.activo,
     colores: producto.colores as unknown as ColorSpec[],
     features: producto.features as unknown as string[],

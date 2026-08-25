@@ -61,14 +61,22 @@ export function ProductDetail({ product }: { product: PublicProduct }) {
               : undefined
           }
         >
-          {product.nuevo ? (
-            <Badge className="absolute left-4 top-4 z-10">Nuevo</Badge>
-          ) : null}
-          {desc ? (
-            <Badge tone="violeta" className="absolute right-4 top-4 z-10">
-              -{desc}%
+          {product.agotado ? (
+            <Badge tone="agotado" className="absolute left-4 top-4 z-10">
+              Agotado
             </Badge>
-          ) : null}
+          ) : (
+            <>
+              {product.nuevo ? (
+                <Badge className="absolute left-4 top-4 z-10">Nuevo</Badge>
+              ) : null}
+              {desc ? (
+                <Badge tone="violeta" className="absolute right-4 top-4 z-10">
+                  -{desc}%
+                </Badge>
+              ) : null}
+            </>
+          )}
           {activeMedia ? (
             activeMedia.type === "image" ? (
               <Image
@@ -134,6 +142,11 @@ export function ProductDetail({ product }: { product: PublicProduct }) {
           ) : (
             <PriceTag value={product.precioCop} showCurrency className="text-2xl" />
           )}
+          {product.agotado ? (
+            <p className="font-heading text-sm font-bold uppercase tracking-wide text-humo">
+              Producto agotado
+            </p>
+          ) : null}
         </div>
 
         <p className="leading-relaxed text-humo">{product.descripcion}</p>
@@ -199,10 +212,15 @@ export function ProductDetail({ product }: { product: PublicProduct }) {
 
         {/* Acciones */}
         <div className="flex flex-col gap-3 sm:flex-row">
-          <Button onClick={handleAdd} className="flex-1">
-            Agregar al carrito
+          <Button onClick={handleAdd} disabled={product.agotado} className="flex-1">
+            {product.agotado ? "Agotado" : "Agregar al carrito"}
           </Button>
-          <Button variant="outline" onClick={handleBuy} className="flex-1">
+          <Button
+            variant="outline"
+            onClick={handleBuy}
+            disabled={product.agotado}
+            className="flex-1"
+          >
             Comprar ahora
           </Button>
         </div>

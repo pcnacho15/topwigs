@@ -35,6 +35,7 @@ export const productSchema = z
     rating: z.number().min(0).max(5),
     reviews: z.number().int().min(0),
     nuevo: z.boolean(),
+    stock: z.number().int().min(0, "No puede ser negativo"),
     activo: z.boolean(),
     colores: z.array(colorSpecSchema).min(1, "Agrega al menos un color"),
     features: z.array(z.string().min(1)),

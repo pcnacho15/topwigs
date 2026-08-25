@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import type { PublicProduct } from "@/lib/public-product";
 import { descuentoPct } from "@/lib/public-product";
+import { cn } from "@/lib/utils";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { PriceTag, formatCOP } from "@/components/ui/price";
@@ -17,8 +18,14 @@ export function ProductCard({ product }: { product: PublicProduct }) {
   return (
     <Card className="group relative overflow-hidden">
       <div className="absolute left-3 top-3 z-10 flex gap-1.5">
-        {product.nuevo ? <Badge>Nuevo</Badge> : null}
-        {desc ? <Badge tone="violeta">-{desc}%</Badge> : null}
+        {product.agotado ? (
+          <Badge tone="agotado">Agotado</Badge>
+        ) : (
+          <>
+            {product.nuevo ? <Badge>Nuevo</Badge> : null}
+            {desc ? <Badge tone="violeta">-{desc}%</Badge> : null}
+          </>
+        )}
       </div>
       <button
         aria-label={`Guardar ${product.nombre} en favoritos`}
@@ -35,7 +42,10 @@ export function ProductCard({ product }: { product: PublicProduct }) {
               alt={product.nombre}
               fill
               sizes="(max-width: 768px) 50vw, 25vw"
-              className="object-cover transition-transform duration-300 group-hover:scale-105"
+              className={cn(
+                "object-cover transition-transform duration-300 group-hover:scale-105",
+                product.agotado && "grayscale opacity-60",
+              )}
             />
           </div>
         ) : (

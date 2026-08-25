@@ -45,6 +45,7 @@ export default async function ProductosPage() {
                 <TableHead>Nombre</TableHead>
                 <TableHead>Categoría</TableHead>
                 <TableHead>Precio</TableHead>
+                <TableHead>Stock</TableHead>
                 <TableHead>Estado</TableHead>
                 <TableHead className="text-right">Acciones</TableHead>
               </TableRow>
@@ -75,10 +76,13 @@ export default async function ProductosPage() {
                       <span className="font-semibold">{formatCOP(p.precioCop)}</span>
                     )}
                   </TableCell>
+                  <TableCell className="text-humo">{p.stock}</TableCell>
                   <TableCell>
-                    <span className={p.activo ? "text-neon" : "text-humo/60"}>
-                      {p.activo ? "Activo" : "Oculto"}
-                    </span>
+                    {!p.activo || p.stock <= 0 ? (
+                      <span className="text-humo/60">Agotado</span>
+                    ) : (
+                      <span className="text-neon">Disponible</span>
+                    )}
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center justify-end gap-1">

@@ -51,7 +51,14 @@ export async function createWompiCheckout(input: {
   const slugs = input.items.map((i) => i.slug);
   const productos = await prisma.product.findMany({
     where: { slug: { in: slugs } },
-    select: { slug: true, nombre: true, precioCop: true, precioOfertaCop: true },
+    select: {
+      slug: true,
+      nombre: true,
+      precioCop: true,
+      precioOfertaCop: true,
+      stock: true,
+      activo: true,
+    },
   });
   const bySlug = new Map(productos.map((p) => [p.slug, p]));
 
@@ -66,8 +73,9 @@ export async function createWompiCheckout(input: {
 
   for (const it of input.items) {
     const p = bySlug.get(it.slug);
-    if (!p) continue;
-    const qty = Math.max(1, Math.min(99, Math.floor(it.qty)));
+    // Producto inexistente, desactivado o sin stock: no se puede comprar.
+    if (!p || !p.activo || p.stock <= 0) continue;
+    const qty = Math.max(1, Math.min(99, p.stock, Math.floor(it.qty)));
     const precio = p.precioOfertaCop ?? p.precioCop;
     subtotalCop += precio * qty;
     snapshot.push({

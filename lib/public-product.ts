@@ -30,6 +30,8 @@ export interface PublicProduct {
   rating: number;
   reviews: number;
   nuevo: boolean;
+  /** true si stock=0 o el admin lo desactivó: sigue visible, pero no se puede comprar. */
+  agotado: boolean;
   colores: PublicColor[];
   features: string[];
   imagenes: string[];

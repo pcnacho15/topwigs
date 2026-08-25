@@ -52,6 +52,7 @@ const EMPTY: ProductInput = {
   rating: 0,
   reviews: 0,
   nuevo: false,
+  stock: 0,
   activo: true,
   colores: [{ nombre: "", tipo: "solid", from: "#ff2f92", to: null }],
   features: [],
@@ -371,6 +372,28 @@ export function ProductForm({ mode, id, categorias, initial }: Props) {
               )}
             />
           </div>
+          <FormField
+            control={form.control}
+            name="stock"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Cantidad en inventario</FormLabel>
+                <FormControl>
+                  <Input
+                    type="number"
+                    min={0}
+                    value={field.value}
+                    onChange={(e) => field.onChange(e.target.valueAsNumber || 0)}
+                  />
+                </FormControl>
+                <FormDescription>
+                  Cuando llega a 0, el producto se sigue mostrando en la tienda
+                  pero marcado como &quot;Agotado&quot; (no se puede comprar).
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
           <div className="grid gap-4 sm:grid-cols-2">
             <FormField
               control={form.control}
@@ -389,7 +412,7 @@ export function ProductForm({ mode, id, categorias, initial }: Props) {
               name="activo"
               render={({ field }) => (
                 <FormItem className="flex items-center justify-between rounded-md border border-linea p-3">
-                  <FormLabel>Activo (visible)</FormLabel>
+                  <FormLabel>Disponible para la venta</FormLabel>
                   <FormControl>
                     <Switch checked={field.value} onCheckedChange={field.onChange} />
                   </FormControl>
@@ -397,6 +420,11 @@ export function ProductForm({ mode, id, categorias, initial }: Props) {
               )}
             />
           </div>
+          <p className="text-xs text-humo/70">
+            Si lo desactivas, el producto sigue apareciendo en la tienda pero
+            se muestra como &quot;Agotado&quot;, igual que cuando el
+            inventario llega a 0.
+          </p>
         </Section>
 
         {error ? <p className="text-sm text-red-500">{error}</p> : null}

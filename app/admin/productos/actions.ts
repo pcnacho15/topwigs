@@ -30,6 +30,7 @@ function toData(d: import("@/lib/schemas/product").ProductInput) {
     rating: d.rating,
     reviews: d.reviews,
     nuevo: d.nuevo,
+    stock: d.stock,
     activo: d.activo,
     colores: json(d.colores),
     features: json(d.features),
