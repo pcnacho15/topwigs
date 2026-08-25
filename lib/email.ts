@@ -22,6 +22,8 @@ interface OrderStatusEmailParams {
   to: string;
   customerName: string;
   reference: string;
+  subtotalCop: number;
+  shippingCop: number;
   totalCop: number;
   items: OrderItem[];
   status: "APPROVED" | "DECLINED" | "VOIDED" | "ERROR";
@@ -87,11 +89,21 @@ function buildOrderEmailHtml(params: OrderStatusEmailParams, isApproved: boolean
         Hola ${escapeHtml(params.customerName)}, ${message}
       </p>
       <table style="width:100%;border-collapse:collapse;">${rows}</table>
-      <div style="display:flex;justify-content:space-between;border-top:1px solid #26262b;margin-top:16px;padding-top:16px;">
-        <span style="color:#999;font-size:13px;">Total</span>
-        <span style="color:#fff;font-weight:bold;font-size:16px;float:right;">${copFormatter.format(
-          params.totalCop,
-        )}</span>
+      <div style="border-top:1px solid #26262b;margin-top:16px;padding-top:16px;">
+        <div style="display:flex;justify-content:space-between;color:#999;font-size:13px;padding:2px 0;">
+          <span>Subtotal</span>
+          <span style="float:right;">${copFormatter.format(params.subtotalCop)}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;color:#999;font-size:13px;padding:2px 0;">
+          <span>Envío · Interrápidísimo</span>
+          <span style="float:right;">${copFormatter.format(params.shippingCop)}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding-top:8px;">
+          <span style="color:#999;font-size:13px;">Total</span>
+          <span style="color:#fff;font-weight:bold;font-size:16px;float:right;">${copFormatter.format(
+            params.totalCop,
+          )}</span>
+        </div>
       </div>
       <p style="color:#666;font-size:11px;letter-spacing:0.05em;text-transform:uppercase;margin-top:24px;">
         Pedido ${params.reference}

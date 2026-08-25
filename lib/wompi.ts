@@ -106,6 +106,8 @@ export async function applyWompiTransaction(tx: WompiTransactionStatus): Promise
       to: order.customerEmail,
       customerName: order.customerName,
       reference: order.reference,
+      subtotalCop: order.subtotalCop,
+      shippingCop: order.shippingCop,
       totalCop: order.totalCop,
       items,
       status: status as "APPROVED" | "DECLINED" | "VOIDED" | "ERROR",

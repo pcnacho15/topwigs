@@ -9,10 +9,12 @@ import { Input, FieldLabel, Textarea } from "@/components/ui/input";
 import { RetroWindow } from "@/components/ui/retro-window";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { HeartDrip } from "@/components/icons";
+import { SHIPPING_COST_COP } from "@/lib/shipping";
 import { createWompiCheckout } from "./actions";
 
 export default function CheckoutPage() {
   const { items, subtotal, hydrated } = useCart();
+  const total = subtotal + SHIPPING_COST_COP;
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -147,7 +149,7 @@ export default function CheckoutPage() {
           </div>
 
           <Button type="submit" disabled={loading} className="w-full">
-            {loading ? "Redirigiendo…" : `Pagar con Wompi · ${formatCOP(subtotal)}`}
+            {loading ? "Redirigiendo…" : `Pagar con Wompi · ${formatCOP(total)}`}
           </Button>
 
           {error ? (
@@ -192,13 +194,23 @@ export default function CheckoutPage() {
                 </li>
               ))}
             </ul>
-            <div className="flex items-center justify-between border-t border-neon/30 pt-4">
-              <span className="font-heading uppercase tracking-wide text-humo">
-                Total
-              </span>
-              <span className="font-heading text-2xl font-bold text-glow">
-                {formatCOP(subtotal)}
-              </span>
+            <div className="space-y-2 border-t border-neon/30 pt-4">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-humo">Subtotal</span>
+                <span className="text-blanco">{formatCOP(subtotal)}</span>
+              </div>
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-humo">Envío · Interrápidísimo</span>
+                <span className="text-blanco">{formatCOP(SHIPPING_COST_COP)}</span>
+              </div>
+              <div className="flex items-center justify-between pt-2">
+                <span className="font-heading uppercase tracking-wide text-humo">
+                  Total
+                </span>
+                <span className="font-heading text-2xl font-bold text-glow">
+                  {formatCOP(total)}
+                </span>
+              </div>
             </div>
           </div>
         </RetroWindow>

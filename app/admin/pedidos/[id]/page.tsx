@@ -82,11 +82,21 @@ export default async function PedidoDetallePage({
                 ))}
               </TableBody>
             </Table>
-            <div className="flex items-center justify-between border-t border-linea px-4 py-4">
-              <span className="font-heading uppercase tracking-wide text-humo">Total</span>
-              <span className="font-heading text-xl font-bold text-glow">
-                {formatCOP(pedido.totalCop)}
-              </span>
+            <div className="space-y-1.5 border-t border-linea px-4 py-4">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-humo">Subtotal</span>
+                <span className="text-blanco">{formatCOP(pedido.subtotalCop)}</span>
+              </div>
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-humo">Envío · Interrápidísimo</span>
+                <span className="text-blanco">{formatCOP(pedido.shippingCop)}</span>
+              </div>
+              <div className="flex items-center justify-between pt-1.5">
+                <span className="font-heading uppercase tracking-wide text-humo">Total</span>
+                <span className="font-heading text-xl font-bold text-glow">
+                  {formatCOP(pedido.totalCop)}
+                </span>
+              </div>
             </div>
           </CardContent>
         </Card>

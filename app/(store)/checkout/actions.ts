@@ -4,6 +4,7 @@ import { createHash } from "node:crypto";
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { getSession } from "@/lib/auth-guard";
+import { SHIPPING_COST_COP } from "@/lib/shipping";
 
 interface CheckoutItem {
   slug: string;
@@ -54,7 +55,7 @@ export async function createWompiCheckout(input: {
   });
   const bySlug = new Map(productos.map((p) => [p.slug, p]));
 
-  let totalCop = 0;
+  let subtotalCop = 0;
   const snapshot: {
     slug: string;
     nombre: string;
@@ -68,7 +69,7 @@ export async function createWompiCheckout(input: {
     if (!p) continue;
     const qty = Math.max(1, Math.min(99, Math.floor(it.qty)));
     const precio = p.precioOfertaCop ?? p.precioCop;
-    totalCop += precio * qty;
+    subtotalCop += precio * qty;
     snapshot.push({
       slug: it.slug,
       nombre: p.nombre,
@@ -77,7 +78,11 @@ export async function createWompiCheckout(input: {
       qty,
     });
   }
-  if (totalCop <= 0) return { ok: false, error: "empty" };
+  if (subtotalCop <= 0) return { ok: false, error: "empty" };
+
+  // Flete plano (Interrápidísimo) — mismo costo a todo el país.
+  const shippingCop = SHIPPING_COST_COP;
+  const totalCop = subtotalCop + shippingCop;
 
   const reference = `TOPWIGS-${Date.now()}-${Math.random()
     .toString(36)
@@ -99,6 +104,8 @@ export async function createWompiCheckout(input: {
       barrio: input.customer.barrio,
       indicaciones: input.customer.indicaciones || null,
       items: json(snapshot),
+      subtotalCop,
+      shippingCop,
       totalCop,
       status: "PENDING",
     },
