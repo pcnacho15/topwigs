@@ -5,6 +5,7 @@ import Image from "next/image";
 import { m, useReducedMotion, type Variants } from "motion/react";
 import wordmarkLg from "@/public/modelos/wordmarkxl.png";
 import { Star, Sparkle, Fire, Truck, Heart } from "@/components/icons";
+import { Bunny } from "@/components/ui/bunny";
 import { fadeUp } from "@/components/motion/variants";
 
 /**
@@ -185,13 +186,7 @@ export function Hero() {
             className="cursor-pointer z-auto group relative inline-flex items-center gap-3 rounded-xl border border-neon bg-noir/60 px-4 font-heading text-sm font-bold uppercase tracking-widest text-blanco shadow-[0_0_22px_-4px_rgba(255,47,146,0.7)] transition-all hover:bg-neon/50 hover:text-noir hover:shadow-[0_0_30px_-2px_rgba(255,47,146,0.9)]"
           >
             Comprar ahora
-            <Image
-              src="bunny.svg"
-              alt="Bunny"
-              width={60}
-              height={60}
-              className="group-hover:text-noir"
-            />
+            <Bunny height={60} />
           </Link>
         </m.div>
       </m.div>
@@ -227,12 +222,9 @@ export function Hero() {
       </div>
 
       {/* Conejo doodle (esquina inferior derecha) */}
-      <Image
-        src="bunny.svg"
-        alt="Bunny"
-        width={60}
-        height={60}
-        className="pointer-events-none absolute bottom-6 right-6 z-10 hidden size-16 text-neon/50 lg:block"
+      <Bunny
+        height={68}
+        className="pointer-events-none absolute bottom-6 right-6 z-10 hidden lg:block"
       />
     </m.section>
   );

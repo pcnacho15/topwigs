@@ -20,6 +20,14 @@ const base: IconProps = {
   "aria-hidden": true,
 };
 
+/** Para los iconos macizos (sin trazo), que pintan con `fill`. */
+const baseFill: IconProps = {
+  viewBox: "0 0 24 24",
+  width: "1em",
+  height: "1em",
+  "aria-hidden": true,
+};
+
 /* --- Decorativos --- */
 
 export function Star(props: IconProps) {
@@ -82,6 +90,24 @@ export function Chain(props: IconProps) {
 }
 
 /* --- Acciones / navegación --- */
+
+/**
+ * Caja de envío. A diferencia del resto, es un icono de relleno: no usa
+ * `base` (que es de trazo) sino sus propios atributos.
+ */
+export function Package(props: IconProps) {
+  return (
+    <svg {...baseFill} {...props}>
+      <path d="M0 0h24v24H0z" fill="none" />
+      <path
+        fill="currentColor"
+        fillRule="evenodd"
+        d="m12 1.635l8.24 4.745l-3.36 1.935l-8.245-4.74zM3.76 6.38l3.37-1.94l8.25 4.745l-3.38 1.95zM17 9.98v3.52h-1.5v-2.655l-2.75 1.59v9.5l8.25-4.75V7.67zm-5.75 2.455V19.5H5V18h4.5v-1.5H3V15h5v-1.5H1V12h2V7.67z"
+        clipRule="evenodd"
+      />
+    </svg>
+  );
+}
 
 export function Cart(props: IconProps) {
   return (
@@ -207,6 +233,16 @@ export function Truck(props: IconProps) {
       <path d="M3 6h11v9H3zM14 9h4l3 3v3h-7" />
       <circle cx="7" cy="18" r="1.6" />
       <circle cx="17.5" cy="18" r="1.6" />
+    </svg>
+  );
+}
+
+/** Pin de ubicación (destino del envío) */
+export function MapPin(props: IconProps) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M12 21s7-5.6 7-11a7 7 0 1 0-14 0c0 5.4 7 11 7 11z" />
+      <circle cx="12" cy="10" r="2.6" />
     </svg>
   );
 }

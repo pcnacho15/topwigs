@@ -7,6 +7,7 @@ import { m, AnimatePresence } from "motion/react";
 import { Wordmark } from "@/components/ui/wordmark";
 import { Search, Cart } from "@/components/icons";
 import { UserMenu } from "@/components/layout/user-menu";
+import { AnnouncementBar } from "@/components/layout/announcement-bar";
 import { useCart } from "@/components/cart/cart-context";
 import { NAV_LINKS } from "@/data/site";
 import { cn } from "@/lib/utils";
@@ -37,6 +38,8 @@ export function Navbar() {
       transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
       className="sticky top-0 z-50 border-b border-neon/30 bg-noir/85 backdrop-blur-md"
     >
+      <AnnouncementBar />
+
       <nav className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between gap-4 px-4">
         <Link
           href="/"

@@ -12,6 +12,7 @@ import { SectionHeading } from "@/components/ui/section-heading";
 import { Reveal } from "@/components/motion/reveal";
 import { Stagger, StaggerItem } from "@/components/motion/stagger";
 import { ChevronRight } from "@/components/icons";
+import { estimateDelivery } from "@/lib/delivery";
 
 // Siempre fresco desde la DB (refleja cambios del admin al instante).
 export const dynamic = "force-dynamic";
@@ -69,7 +70,9 @@ export default async function ProductoPage({
       </nav>
 
       <Reveal>
-        <ProductDetail product={product} />
+        {/* La estimación se calcula aquí (servidor) y baja como texto: la
+            página es force-dynamic, así que se recalcula en cada visita. */}
+        <ProductDetail product={product} envio={estimateDelivery()} />
       </Reveal>
 
       {related.length > 0 ? (

@@ -9,14 +9,28 @@ import { Input, FieldLabel, Textarea } from "@/components/ui/input";
 import { RetroWindow } from "@/components/ui/retro-window";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { HeartDrip } from "@/components/icons";
-import { SHIPPING_COST_COP } from "@/lib/shipping";
+import {
+  FREE_SHIPPING_THRESHOLD_COP,
+  shippingCostFor,
+} from "@/lib/shipping";
+import { estimateDelivery } from "@/lib/delivery";
+import { ShippingSteps } from "@/components/ui/shipping-steps";
 import { createWompiCheckout } from "./actions";
+import Image from "next/image";
 
 export default function CheckoutPage() {
   const { items, subtotal, hydrated } = useCart();
-  const total = subtotal + SHIPPING_COST_COP;
+  // Mismo cálculo que usa el servidor al crear la orden.
+  const shipping = shippingCostFor(subtotal);
+  const total = subtotal + shipping;
+  const faltaParaEnvioGratis = FREE_SHIPPING_THRESHOLD_COP - subtotal;
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Se calcula una sola vez al montar. Puede hacerse en el cliente sin
+  // riesgo de hidratación porque el guard de `hydrated` de más abajo impide
+  // que esta pantalla se pinte en el servidor; y las fechas se fijan a la
+  // zona horaria de Colombia, no a la del dispositivo.
+  const [envio] = useState(estimateDelivery);
 
   // Evita el parpadeo "vacío" mientras se carga el carrito de localStorage.
   if (!hydrated) {
@@ -84,13 +98,21 @@ export default function CheckoutPage() {
 
       <div className="grid gap-8 lg:grid-cols-2">
         {/* Datos + pago */}
-        <form onSubmit={onSubmit} className="space-y-5">
+        <form
+          onSubmit={onSubmit}
+          className="space-y-5"
+        >
           <h2 className="font-heading text-lg font-bold uppercase tracking-wide">
             Tus datos
           </h2>
           <div>
             <FieldLabel htmlFor="nombre">Nombre completo</FieldLabel>
-            <Input id="nombre" name="nombre" required placeholder="Tu nombre" />
+            <Input
+              id="nombre"
+              name="nombre"
+              required
+              placeholder="Tu nombre"
+            />
           </div>
           <div>
             <FieldLabel htmlFor="email">Correo electrónico</FieldLabel>
@@ -128,19 +150,36 @@ export default function CheckoutPage() {
           <div className="grid gap-5 sm:grid-cols-2">
             <div>
               <FieldLabel htmlFor="departamento">Departamento</FieldLabel>
-              <Input id="departamento" name="departamento" required placeholder="Antioquia" />
+              <Input
+                id="departamento"
+                name="departamento"
+                required
+                placeholder="Antioquia"
+              />
             </div>
             <div>
               <FieldLabel htmlFor="municipio">Municipio / Ciudad</FieldLabel>
-              <Input id="municipio" name="municipio" required placeholder="Medellín" />
+              <Input
+                id="municipio"
+                name="municipio"
+                required
+                placeholder="Medellín"
+              />
             </div>
           </div>
           <div>
             <FieldLabel htmlFor="barrio">Barrio</FieldLabel>
-            <Input id="barrio" name="barrio" required placeholder="El Poblado" />
+            <Input
+              id="barrio"
+              name="barrio"
+              required
+              placeholder="El Poblado"
+            />
           </div>
           <div>
-            <FieldLabel htmlFor="indicaciones">Indicaciones de entrega (opcional)</FieldLabel>
+            <FieldLabel htmlFor="indicaciones">
+              Indicaciones de entrega (opcional)
+            </FieldLabel>
             <Textarea
               id="indicaciones"
               name="indicaciones"
@@ -148,12 +187,21 @@ export default function CheckoutPage() {
             />
           </div>
 
-          <Button type="submit" disabled={loading} className="w-full">
-            {loading ? "Redirigiendo…" : `Pagar con Wompi · ${formatCOP(total)}`}
+          <Button
+            type="submit"
+            disabled={loading}
+            className="w-full"
+          >
+            {loading
+              ? "Redirigiendo…"
+              : `Pagar con Wompi · ${formatCOP(total)}`}
           </Button>
 
           {error ? (
-            <p role="alert" className="text-sm text-neon">
+            <p
+              role="alert"
+              className="text-sm text-neon"
+            >
               {error}
             </p>
           ) : null}
@@ -164,56 +212,88 @@ export default function CheckoutPage() {
           </p>
         </form>
 
-        {/* Resumen */}
-        <RetroWindow title="resumen.exe">
-          <div className="space-y-4 p-5 sm:p-6">
-            <h2 className="font-heading text-lg font-bold uppercase tracking-wide">
-              Tu pedido
-            </h2>
-            <ul className="divide-y divide-linea">
-              {items.map((item) => (
-                <li key={item.id} className="flex items-center gap-3 py-3">
-                  <span
-                    className="size-12 shrink-0 rounded-goth border border-linea"
-                    style={{
-                      background: `radial-gradient(120% 100% at 50% 0%, ${item.colorHex}, #0a0a0d 82%)`,
-                    }}
-                    aria-hidden
-                  />
-                  <div className="flex-1">
-                    <p className="font-heading text-sm font-bold uppercase tracking-wide">
-                      {item.nombre}
-                    </p>
-                    <p className="text-xs text-humo">
-                      {item.colorNombre} · x{item.qty}
-                    </p>
-                  </div>
-                  <span className="font-heading text-sm font-bold">
-                    {formatCOP(item.precio * item.qty)}
+        {/* Resumen + tiempos de envío */}
+        <div className="space-y-6">
+          <RetroWindow title="resumen.exe">
+            <div className="space-y-4 p-5 sm:p-6">
+              <h2 className="font-heading text-lg font-bold uppercase tracking-wide">
+                Tu pedido
+              </h2>
+              <ul className="divide-y divide-linea">
+                {items.map((item) => (
+                  <li
+                    key={item.id}
+                    className="flex items-center gap-3 py-3"
+                  >
+                    {item.imagen ? (
+                      <div className="relative size-16 shrink-0 overflow-hidden rounded-goth border border-linea bg-surface-1">
+                        <Image
+                          src={item.imagen}
+                          alt={item.nombre}
+                          fill
+                          sizes="64px"
+                          className="object-cover"
+                        />
+                      </div>
+                    ) : (
+                      // Sin foto: se cae al swatch del color elegido.
+                      <span
+                        className="size-16 shrink-0 rounded-goth border border-linea"
+                        style={{
+                          background: `radial-gradient(120% 100% at 50% 0%, ${item.colorHex}, #0a0a0d 82%)`,
+                        }}
+                        aria-hidden
+                      />
+                    )}
+                    <div className="flex-1">
+                      <p className="font-heading text-sm font-bold uppercase tracking-wide">
+                        {item.nombre}
+                      </p>
+                      <p className="text-xs text-humo">
+                        {item.colorNombre} · x{item.qty}
+                      </p>
+                    </div>
+                    <span className="font-heading text-sm font-bold">
+                      {formatCOP(item.precio * item.qty)}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+              <div className="space-y-2 border-t border-neon/30 pt-4">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-humo">Subtotal</span>
+                  <span className="text-blanco">{formatCOP(subtotal)}</span>
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-humo">Envío</span>
+                  {shipping === 0 ? (
+                    <span className="font-heading font-bold uppercase text-neon">
+                      Gratis
+                    </span>
+                  ) : (
+                    <span className="text-blanco">{formatCOP(shipping)}</span>
+                  )}
+                </div>
+                {/* {faltaParaEnvioGratis > 0 ? (
+                  <p className="text-xs text-humo/80">
+                    Te faltan {formatCOP(faltaParaEnvioGratis)} para el envío
+                    gratis.
+                  </p>
+                ) : null} */}
+                <div className="flex items-center justify-between pt-2">
+                  <span className="font-heading uppercase tracking-wide text-humo">
+                    Total
                   </span>
-                </li>
-              ))}
-            </ul>
-            <div className="space-y-2 border-t border-neon/30 pt-4">
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-humo">Subtotal</span>
-                <span className="text-blanco">{formatCOP(subtotal)}</span>
-              </div>
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-humo">Envío · Interrápidísimo</span>
-                <span className="text-blanco">{formatCOP(SHIPPING_COST_COP)}</span>
-              </div>
-              <div className="flex items-center justify-between pt-2">
-                <span className="font-heading uppercase tracking-wide text-humo">
-                  Total
-                </span>
-                <span className="font-heading text-2xl font-bold text-glow">
-                  {formatCOP(total)}
-                </span>
+                  <span className="font-heading text-2xl font-bold text-glow">
+                    {formatCOP(total)}
+                  </span>
+                </div>
               </div>
             </div>
-          </div>
-        </RetroWindow>
+          </RetroWindow>
+
+          <ShippingSteps estimate={envio} />
+        </div>
       </div>
     </main>
   );

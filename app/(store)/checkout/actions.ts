@@ -4,7 +4,7 @@ import { createHash } from "node:crypto";
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { getSession } from "@/lib/auth-guard";
-import { SHIPPING_COST_COP } from "@/lib/shipping";
+import { shippingCostFor } from "@/lib/shipping";
 
 interface CheckoutItem {
   slug: string;
@@ -88,8 +88,9 @@ export async function createWompiCheckout(input: {
   }
   if (subtotalCop <= 0) return { ok: false, error: "empty" };
 
-  // Flete plano (Interrápidísimo) — mismo costo a todo el país.
-  const shippingCop = SHIPPING_COST_COP;
+  // Flete plano (Interrápidísimo) — mismo costo a todo el país, o gratis
+  // si el subtotal (ya recalculado con precios de la BD) llega al umbral.
+  const shippingCop = shippingCostFor(subtotalCop);
   const totalCop = subtotalCop + shippingCop;
 
   const reference = `TOPWIGS-${Date.now()}-${Math.random()

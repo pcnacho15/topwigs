@@ -11,11 +11,19 @@ import { PriceTag, formatCOP } from "@/components/ui/price";
 import { RatingStars } from "@/components/ui/rating-stars";
 import { HeartDrip, Minus, Plus, Star } from "@/components/icons";
 import { useCart } from "@/components/cart/cart-context";
+import { ShippingEstimate } from "@/components/ui/shipping-estimate";
+import type { DeliveryEstimate } from "@/lib/delivery";
 import { cn } from "@/lib/utils";
 
 type Media = { type: "image" | "video"; url: string };
 
-export function ProductDetail({ product }: { product: PublicProduct }) {
+export function ProductDetail({
+  product,
+  envio,
+}: {
+  product: PublicProduct;
+  envio: DeliveryEstimate;
+}) {
   const { add, open } = useCart();
   const router = useRouter();
   const [color, setColor] = useState(0);
@@ -82,7 +90,10 @@ export function ProductDetail({ product }: { product: PublicProduct }) {
           }
         >
           {product.agotado ? (
-            <Badge tone="agotado" className="absolute left-4 top-4 z-10">
+            <Badge
+              tone="agotado"
+              className="absolute left-4 top-4 z-10"
+            >
               Agotado
             </Badge>
           ) : (
@@ -91,7 +102,10 @@ export function ProductDetail({ product }: { product: PublicProduct }) {
                 <Badge className="absolute left-4 top-4 z-10">Nuevo</Badge>
               ) : null}
               {desc ? (
-                <Badge tone="violeta" className="absolute right-4 top-4 z-10">
+                <Badge
+                  tone="violeta"
+                  className="absolute right-4 top-4 z-10"
+                >
                   -{desc}%
                 </Badge>
               ) : null}
@@ -131,9 +145,19 @@ export function ProductDetail({ product }: { product: PublicProduct }) {
                 )}
               >
                 {m.type === "image" ? (
-                  <Image src={m.url} alt="" fill sizes="64px" className="object-cover" />
+                  <Image
+                    src={m.url}
+                    alt=""
+                    fill
+                    sizes="64px"
+                    className="object-cover"
+                  />
                 ) : (
-                  <video src={m.url} muted className="size-full object-cover" />
+                  <video
+                    src={m.url}
+                    muted
+                    className="size-full object-cover"
+                  />
                 )}
               </button>
             ))}
@@ -147,7 +171,10 @@ export function ProductDetail({ product }: { product: PublicProduct }) {
           <h1 className="font-heading text-3xl font-extrabold uppercase text-glow sm:text-4xl">
             {product.nombre}
           </h1>
-          <RatingStars value={product.rating} reviews={product.reviews} />
+          <RatingStars
+            value={product.rating}
+            reviews={product.reviews}
+          />
           {product.precioOfertaCop ? (
             <div className="flex flex-wrap items-baseline gap-3">
               <PriceTag
@@ -160,7 +187,11 @@ export function ProductDetail({ product }: { product: PublicProduct }) {
               </span>
             </div>
           ) : (
-            <PriceTag value={product.precioCop} showCurrency className="text-2xl" />
+            <PriceTag
+              value={product.precioCop}
+              showCurrency
+              className="text-2xl"
+            />
           )}
           {product.agotado ? (
             <p className="font-heading text-sm font-bold uppercase tracking-wide text-humo">
@@ -174,7 +205,10 @@ export function ProductDetail({ product }: { product: PublicProduct }) {
         {product.features.length > 0 ? (
           <ul className="space-y-2">
             {product.features.map((f) => (
-              <li key={f} className="flex items-center gap-2 text-sm text-humo">
+              <li
+                key={f}
+                className="flex items-center gap-2 text-sm text-humo"
+              >
                 <Star className="size-4 shrink-0 fill-neon text-neon" />
                 {f}
               </li>
@@ -219,7 +253,9 @@ export function ProductDetail({ product }: { product: PublicProduct }) {
             >
               <Minus className="size-4" />
             </button>
-            <span className="w-10 text-center font-heading font-bold">{qty}</span>
+            <span className="w-10 text-center font-heading font-bold">
+              {qty}
+            </span>
             <button
               onClick={() => setQty((q) => Math.min(10, q + 1))}
               aria-label="Aumentar cantidad"
@@ -232,18 +268,25 @@ export function ProductDetail({ product }: { product: PublicProduct }) {
 
         {/* Acciones */}
         <div className="flex flex-col gap-3 sm:flex-row">
-          <Button onClick={handleAdd} disabled={product.agotado} className="flex-1">
+          <Button
+            onClick={handleAdd}
+            disabled={product.agotado}
+            className="flex-none sm:flex-1"
+          >
             {product.agotado ? "Agotado" : "Agregar al carrito"}
           </Button>
           <Button
             variant="outline"
             onClick={handleBuy}
             disabled={product.agotado}
-            className="flex-1"
+            className="flex-none sm:flex-1"
           >
             Comprar ahora
           </Button>
         </div>
+
+        {/* Tiempos de envío: justo bajo la decisión de compra. */}
+        <ShippingEstimate estimate={envio} />
       </div>
     </div>
   );

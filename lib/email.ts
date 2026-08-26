@@ -96,7 +96,11 @@ function buildOrderEmailHtml(params: OrderStatusEmailParams, isApproved: boolean
         </div>
         <div style="display:flex;justify-content:space-between;color:#999;font-size:13px;padding:2px 0;">
           <span>Envío · Interrápidísimo</span>
-          <span style="float:right;">${copFormatter.format(params.shippingCop)}</span>
+          <span style="float:right;">${
+            params.shippingCop === 0
+              ? "Gratis"
+              : copFormatter.format(params.shippingCop)
+          }</span>
         </div>
         <div style="display:flex;justify-content:space-between;padding-top:8px;">
           <span style="color:#999;font-size:13px;">Total</span>

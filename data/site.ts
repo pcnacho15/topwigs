@@ -1,6 +1,7 @@
 /** Configuración global del sitio (mock de Fase 1). */
 
 import { CATALOGOS } from "@/data/catalogos";
+import { FREE_SHIPPING_LABEL } from "@/lib/shipping";
 
 export const NAV_LINKS = [
   { href: "/", label: "Inicio" },
@@ -25,3 +26,8 @@ export const SOCIALS = {
 } as const;
 
 export const TAGLINE = "No eres otra persona, eres otra versión de ti.";
+
+/** Mensaje de la cinta superior del header. Se arma con el umbral real de
+ * `lib/shipping.ts` para que el anuncio no pueda contradecir lo que cobra
+ * el checkout. */
+export const ANNOUNCEMENT = `ENVÍO GRATIS POR COMPRAS SUPERIORES A $${FREE_SHIPPING_LABEL}`;
