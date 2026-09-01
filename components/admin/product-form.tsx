@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm, useFieldArray, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -35,17 +35,25 @@ import { MediaPicker } from "@/components/admin/media-picker";
 import { StringListEditor } from "@/components/admin/string-list-editor";
 import { slugify } from "@/lib/utils";
 
+/** Categoría del selector, con el catálogo al que pertenece. */
+export interface CategoriaOpcion {
+  id: string;
+  nombre: string;
+  tipoId: string;
+  tipoLabel: string;
+  tipoSlug: string;
+}
+
 interface Props {
   mode: "create" | "edit";
   id?: string;
-  categorias: { id: string; nombre: string }[];
+  categorias: CategoriaOpcion[];
   initial?: ProductInput;
 }
 
 const EMPTY: ProductInput = {
   nombre: "",
   slug: "",
-  tipo: "peluca",
   descripcion: "",
   categoryId: "",
   precioCop: 0,
@@ -76,9 +84,48 @@ export function ProductForm({ mode, id, categorias, initial }: Props) {
   });
 
   const colores = useFieldArray({ control: form.control, name: "colores" });
-  const tipo = form.watch("tipo");
   const imagenes = form.watch("imagenes");
   const videos = form.watch("videos");
+  const categoryId = form.watch("categoryId");
+
+  /**
+   * El tipo de producto no se guarda: lo hereda la categoría. Aquí solo sirve
+   * para acotar el selector de categorías (y para saber en qué carpeta de
+   * Cloudinary van los archivos).
+   */
+  const tipos = useMemo(() => {
+    const vistos = new Map<string, { id: string; label: string }>();
+    for (const c of categorias) {
+      if (!vistos.has(c.tipoId)) {
+        vistos.set(c.tipoId, { id: c.tipoId, label: c.tipoLabel });
+      }
+    }
+    return [...vistos.values()];
+  }, [categorias]);
+
+  const [tipoId, setTipoId] = useState(
+    () =>
+      categorias.find((c) => c.id === (initial?.categoryId ?? categorias[0]?.id))
+        ?.tipoId ??
+      tipos[0]?.id ??
+      "",
+  );
+
+  const categoriasDelTipo = useMemo(
+    () => categorias.filter((c) => c.tipoId === tipoId),
+    [categorias, tipoId],
+  );
+
+  // La carpeta de Cloudinary sale de la categoría realmente seleccionada.
+  const tipoSlug =
+    categorias.find((c) => c.id === categoryId)?.tipoSlug ?? "";
+
+  /** Al cambiar de catálogo, la categoría anterior ya no aplica. */
+  function cambiarTipo(nuevoTipoId: string) {
+    setTipoId(nuevoTipoId);
+    const primera = categorias.find((c) => c.tipoId === nuevoTipoId);
+    form.setValue("categoryId", primera?.id ?? "", { shouldDirty: true });
+  }
 
   /**
    * La galería es la fuente de los medios que cada color puede asignar: al
@@ -152,31 +199,26 @@ export function ProductForm({ mode, id, categorias, initial }: Props) {
               </FormItem>
             )}
           />
-          <FormField
-            control={form.control}
-            name="tipo"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Tipo</FormLabel>
-                <Select value={field.value} onValueChange={field.onChange}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="peluca">Peluca</SelectItem>
-                    <SelectItem value="lente">Lente</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormDescription>
-                  Define la carpeta en Cloudinary: topwigs/pelucas o
-                  topwigs/lentes.
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          {/* No es un campo del producto: filtra las categorías de abajo. */}
+          <FormItem>
+            <FormLabel>Tipo de producto</FormLabel>
+            <Select value={tipoId} onValueChange={cambiarTipo}>
+              <SelectTrigger>
+                <SelectValue placeholder="Selecciona un tipo" />
+              </SelectTrigger>
+              <SelectContent>
+                {tipos.map((t) => (
+                  <SelectItem key={t.id} value={t.id}>
+                    {t.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <FormDescription>
+              Define el catálogo del producto y la carpeta en Cloudinary. El
+              producto queda en el catálogo de la categoría que elijas abajo.
+            </FormDescription>
+          </FormItem>
           <FormField
             control={form.control}
             name="categoryId"
@@ -190,7 +232,7 @@ export function ProductForm({ mode, id, categorias, initial }: Props) {
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {categorias.map((c) => (
+                    {categoriasDelTipo.map((c) => (
                       <SelectItem key={c.id} value={c.id}>
                         {c.nombre}
                       </SelectItem>
@@ -294,7 +336,7 @@ export function ProductForm({ mode, id, categorias, initial }: Props) {
                     value={field.value}
                     onChange={(urls) => setMedia("imagenes", urls)}
                     resourceType="image"
-                    tipo={tipo}
+                    tipo={tipoSlug}
                   />
                 </FormControl>
               </FormItem>
@@ -312,7 +354,7 @@ export function ProductForm({ mode, id, categorias, initial }: Props) {
                     value={field.value}
                     onChange={(urls) => setMedia("videos", urls)}
                     resourceType="video"
-                    tipo={tipo}
+                    tipo={tipoSlug}
                   />
                 </FormControl>
               </FormItem>

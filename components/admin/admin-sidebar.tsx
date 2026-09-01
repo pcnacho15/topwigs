@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard,
+  Layers,
   Tags,
   Package,
   ShoppingBag,
@@ -15,6 +16,7 @@ import { cn } from "@/lib/utils";
 
 const LINKS = [
   { href: "/admin", label: "Dashboard", Icon: LayoutDashboard, exact: true },
+  { href: "/admin/tipos", label: "Tipos de producto", Icon: Layers },
   { href: "/admin/categorias", label: "Categorías", Icon: Tags },
   { href: "/admin/productos", label: "Productos", Icon: Package },
   { href: "/admin/pedidos", label: "Pedidos", Icon: ShoppingBag },

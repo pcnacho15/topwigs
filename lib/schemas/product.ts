@@ -32,7 +32,7 @@ export const productSchema = z
       .min(2)
       .max(80)
       .regex(/^[a-z0-9-]+$/, "Solo minúsculas, números y guiones"),
-    tipo: z.enum(["peluca", "lente"]),
+    // El tipo de producto no se guarda aquí: lo define la categoría elegida.
     descripcion: z.string().min(10, "Mínimo 10 caracteres"),
     categoryId: z.string().min(1, "Selecciona una categoría"),
     precioCop: z.number().int().min(0, "Precio inválido"),

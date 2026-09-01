@@ -6,8 +6,9 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "res.cloudinary.com" },
     ],
   },
-  // El catálogo único se dividió en /pelucas y /lentes. Los query params
-  // (?categoria=) se conservan en el redirect.
+  // Ruta vieja del catálogo único. Los query params (?categoria=) se
+  // conservan en el redirect. Por eso "catalogo" es un slug reservado para
+  // los tipos de producto (ver `lib/schemas/product-type.ts`).
   redirects() {
     return [{ source: "/catalogo", destination: "/pelucas", permanent: true }];
   },

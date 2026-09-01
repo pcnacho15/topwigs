@@ -15,8 +15,12 @@ export default async function EditarProductoPage({
   const [producto, categorias] = await Promise.all([
     prisma.product.findUnique({ where: { id } }),
     prisma.category.findMany({
-      orderBy: { orden: "asc" },
-      select: { id: true, nombre: true },
+      orderBy: [{ productType: { orden: "asc" } }, { orden: "asc" }],
+      select: {
+        id: true,
+        nombre: true,
+        productType: { select: { id: true, label: true, slug: true } },
+      },
     }),
   ]);
   if (!producto) notFound();
@@ -31,10 +35,17 @@ export default async function EditarProductoPage({
     videos: (c.videos ?? []).filter((u) => videos.includes(u)),
   }));
 
+  const opciones = categorias.map((c) => ({
+    id: c.id,
+    nombre: c.nombre,
+    tipoId: c.productType.id,
+    tipoLabel: c.productType.label,
+    tipoSlug: c.productType.slug,
+  }));
+
   const initial: ProductInput = {
     nombre: producto.nombre,
     slug: producto.slug,
-    tipo: producto.tipo === "lente" ? "lente" : "peluca",
     descripcion: producto.descripcion,
     categoryId: producto.categoryId,
     precioCop: producto.precioCop,
@@ -58,7 +69,7 @@ export default async function EditarProductoPage({
       <ProductForm
         mode="edit"
         id={producto.id}
-        categorias={categorias}
+        categorias={opciones}
         initial={initial}
       />
     </div>

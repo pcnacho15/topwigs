@@ -1,16 +1,36 @@
 import "server-only";
 import { cache } from "react";
-import type { Product, Category } from "@prisma/client";
+import type { Product, Category, ProductType } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import type {
   PublicProduct,
   PublicCategory,
+  PublicCategoryConTipo,
   PublicColor,
-  ProductTipo,
+  PublicProductType,
 } from "@/lib/public-product";
+import { catalogoHref } from "@/lib/public-product";
+
+/** Campos del tipo que necesita la tienda (nunca el id interno). */
+const TIPO_SELECT = {
+  slug: true,
+  nombre: true,
+  label: true,
+  descripcion: true,
+} as const;
+
+const CATEGORIA_SELECT = {
+  slug: true,
+  nombre: true,
+  productType: { select: TIPO_SELECT },
+} as const;
 
 type ProductWithCategory = Product & {
-  category: { slug: string; nombre: string };
+  category: { slug: string; nombre: string; productType: PublicProductType };
+};
+
+type CategoryRow = Pick<Category, "id" | "slug" | "nombre" | "imagen"> & {
+  productType: PublicProductType;
 };
 
 /**
@@ -42,7 +62,9 @@ function mapProduct(p: ProductWithCategory): PublicProduct {
     descripcion: p.descripcion,
     precioCop: p.precioCop,
     precioOfertaCop: p.precioOfertaCop,
-    tipo: p.tipo,
+    // El tipo lo define la categoría: un producto siempre está en el catálogo
+    // de su categoría.
+    tipo: p.category.productType,
     categoria: { slug: p.category.slug, nombre: p.category.nombre },
     rating: p.rating,
     reviews: p.reviews,
@@ -55,6 +77,58 @@ function mapProduct(p: ProductWithCategory): PublicProduct {
   };
 }
 
+function mapCategoria(c: CategoryRow): PublicCategoryConTipo {
+  return {
+    id: c.id,
+    slug: c.slug,
+    nombre: c.nombre,
+    imagen: c.imagen,
+    tipo: c.productType,
+  };
+}
+
+// ─────────────── Catálogos (tipos de producto) ───────────────
+
+/** Catálogos visibles en la tienda, en el orden que definió el admin. */
+export const getCatalogos = cache(async (): Promise<PublicProductType[]> => {
+  const rows: Pick<
+    ProductType,
+    "slug" | "nombre" | "label" | "descripcion"
+  >[] = await prisma.productType.findMany({
+    where: { activo: true },
+    orderBy: { orden: "asc" },
+    select: TIPO_SELECT,
+  });
+  return rows;
+});
+
+/** Un catálogo por su slug (la ruta pública). `null` si no existe o está oculto. */
+export const getCatalogo = cache(
+  async (slug: string): Promise<PublicProductType | null> => {
+    const row = await prisma.productType.findFirst({
+      where: { slug, activo: true },
+      select: TIPO_SELECT,
+    });
+    return row;
+  },
+);
+
+/**
+ * Links de navegación: Inicio + un link por catálogo activo. Al vivir en la
+ * base de datos, un tipo de producto nuevo aparece solo en navbar y footer.
+ */
+export const getNavLinks = cache(
+  async (): Promise<{ href: string; label: string }[]> => {
+    const catalogos = await getCatalogos();
+    return [
+      { href: "/", label: "Inicio" },
+      ...catalogos.map((c) => ({ href: catalogoHref(c.slug), label: c.label })),
+    ];
+  },
+);
+
+// ─────────────── Productos ───────────────
+
 /**
  * Todos los productos (con su categoría), incluidos los agotados o
  * desactivados: siguen siendo visibles en la tienda, solo marcados como
@@ -63,18 +137,18 @@ function mapProduct(p: ProductWithCategory): PublicProduct {
 export const getPublicProducts = cache(async (): Promise<PublicProduct[]> => {
   const rows = await prisma.product.findMany({
     orderBy: { createdAt: "desc" },
-    include: { category: { select: { slug: true, nombre: true } } },
+    include: { category: { select: CATEGORIA_SELECT } },
   });
   return rows.map(mapProduct);
 });
 
-/** Productos de un tipo ("peluca" | "lente"): un catálogo por tipo. */
+/** Productos de un catálogo, filtrados por el tipo de su categoría. */
 export const getPublicProductsByTipo = cache(
-  async (tipo: ProductTipo): Promise<PublicProduct[]> => {
+  async (tipoSlug: string): Promise<PublicProduct[]> => {
     const rows = await prisma.product.findMany({
-      where: { tipo },
+      where: { category: { productType: { slug: tipoSlug } } },
       orderBy: { createdAt: "desc" },
-      include: { category: { select: { slug: true, nombre: true } } },
+      include: { category: { select: CATEGORIA_SELECT } },
     });
     return rows.map(mapProduct);
   },
@@ -84,7 +158,7 @@ export const getPublicProductBySlug = cache(
   async (slug: string): Promise<PublicProduct | null> => {
     const p = await prisma.product.findFirst({
       where: { slug },
-      include: { category: { select: { slug: true, nombre: true } } },
+      include: { category: { select: CATEGORIA_SELECT } },
     });
     return p ? mapProduct(p) : null;
   },
@@ -97,32 +171,69 @@ export const getAllProductSlugs = cache(async (): Promise<string[]> => {
   return rows.map((r) => r.slug);
 });
 
+// ─────────────── Categorías ───────────────
+
 export const getPublicCategories = cache(
-  async (): Promise<PublicCategory[]> => {
-    const rows: Pick<Category, "id" | "slug" | "nombre" | "imagen">[] =
-      await prisma.category.findMany({
-        where: { activa: true },
-        orderBy: { orden: "asc" },
-        select: { id: true, slug: true, nombre: true, imagen: true },
-      });
+  async (): Promise<PublicCategoryConTipo[]> => {
+    const rows = await prisma.category.findMany({
+      where: { activa: true },
+      orderBy: [{ productType: { orden: "asc" } }, { orden: "asc" }],
+      select: {
+        id: true,
+        slug: true,
+        nombre: true,
+        imagen: true,
+        productType: { select: TIPO_SELECT },
+      },
+    });
+    return rows.map(mapCategoria);
+  },
+);
+
+/**
+ * Filtros de un catálogo: las categorías de ese tipo que ya tienen al menos un
+ * producto (incluidos agotados/desactivados, que siguen visibles). Una
+ * categoría recién creada y vacía no aparece como pestaña vacía.
+ */
+export const getPublicCategoriesByTipo = cache(
+  async (tipoSlug: string): Promise<PublicCategory[]> => {
+    const rows = await prisma.category.findMany({
+      where: {
+        activa: true,
+        productType: { slug: tipoSlug },
+        products: { some: {} },
+      },
+      orderBy: { orden: "asc" },
+      select: { id: true, slug: true, nombre: true, imagen: true },
+    });
     return rows;
   },
 );
 
 /**
- * Categorías que tienen al menos un producto del tipo dado (incluye
- * agotados/desactivados, que siguen siendo visibles). Así cada catálogo
- * muestra solo sus propios filtros sin necesidad de marcar el tipo en la
- * categoría (el tipo vive en el producto).
+ * Categorías que el admin marcó como destacadas para el Home, de cualquier
+ * catálogo: cada tarjeta enlaza al catálogo de su propio tipo. No lista todo,
+ * solo lo elegido explícitamente, y exige al menos un producto para no llevar
+ * a un catálogo filtrado y vacío.
  */
-export const getPublicCategoriesByTipo = cache(
-  async (tipo: ProductTipo): Promise<PublicCategory[]> => {
-    const rows: Pick<Category, "id" | "slug" | "nombre" | "imagen">[] =
-      await prisma.category.findMany({
-        where: { activa: true, products: { some: { tipo } } },
-        orderBy: { orden: "asc" },
-        select: { id: true, slug: true, nombre: true, imagen: true },
-      });
-    return rows;
+export const getFeaturedCategories = cache(
+  async (): Promise<PublicCategoryConTipo[]> => {
+    const rows = await prisma.category.findMany({
+      where: {
+        activa: true,
+        destacada: true,
+        productType: { activo: true },
+        products: { some: {} },
+      },
+      orderBy: [{ productType: { orden: "asc" } }, { orden: "asc" }],
+      select: {
+        id: true,
+        slug: true,
+        nombre: true,
+        imagen: true,
+        productType: { select: TIPO_SELECT },
+      },
+    });
+    return rows.map(mapCategoria);
   },
 );

@@ -19,7 +19,8 @@ export function MediaUploader({
   value: string[];
   onChange: (urls: string[]) => void;
   resourceType: "image" | "video";
-  tipo: "peluca" | "lente";
+  /** Slug del tipo de producto: define la carpeta en Cloudinary. */
+  tipo: string;
 }) {
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -32,7 +33,11 @@ export function MediaUploader({
     for (const file of Array.from(files)) {
       const sig = await signCloudinaryUpload(resourceType, tipo);
       if (!sig.ok) {
-        setError("Cloudinary no está configurado (faltan llaves en el servidor).");
+        setError(
+          sig.error === "tipo_desconocido"
+            ? "Selecciona una categoría antes de subir archivos."
+            : "Cloudinary no está configurado (faltan llaves en el servidor).",
+        );
         break;
       }
       const fd = new FormData();

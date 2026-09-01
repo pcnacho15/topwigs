@@ -12,16 +12,42 @@ datasource db {
 
 // ─────────────── Dominio ───────────────
 
+/**
+ * Tipo de producto = un catálogo de la tienda (pelucas, lentes, y los que el
+ * admin agregue después). Vive en la base de datos, no en el código: el slug
+ * es la ruta pública (`/pelucas`) y cada tipo tiene sus propias categorías.
+ */
+model ProductType {
+  id          String     @id @default(cuid())
+  slug        String     @unique // ruta del catálogo: /<slug>
+  nombre      String // singular, para formularios y textos: "Peluca"
+  label       String // plural, para el nav y el título: "Pelucas"
+  descripcion String     @default("")
+  orden       Int        @default(0)
+  activo      Boolean    @default(true)
+  categories  Category[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+}
+
 model Category {
-  id        String    @id @default(cuid())
-  slug      String    @unique
-  nombre    String
-  imagen    String? // URL de portada (Cloudinary), mostrada en Home/catálogo
-  orden     Int       @default(0)
-  activa    Boolean   @default(true)
-  products  Product[]
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  id            String      @id @default(cuid())
+  slug          String
+  nombre        String
+  imagen        String? // URL de portada (Cloudinary), mostrada en Home/catálogo
+  orden         Int         @default(0)
+  activa        Boolean     @default(true)
+  destacada     Boolean     @default(false) // el admin la elige para "Categorías destacadas" del Home
+  productTypeId String
+  productType   ProductType @relation(fields: [productTypeId], references: [id])
+  products      Product[]
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  // El slug solo tiene que ser único dentro de su catálogo: "fantasia" puede
+  // existir a la vez en pelucas y en lentes.
+  @@unique([productTypeId, slug])
+  @@index([productTypeId])
 }
 
 model Product {
@@ -31,7 +57,8 @@ model Product {
   descripcion     String
   precioCop       Int
   precioOfertaCop Int? // precio con descuento (opcional). Si < precioCop → en oferta
-  tipo            String   @default("peluca") // "peluca" | "lente" (define la carpeta en Cloudinary)
+  // El tipo de producto no se guarda aquí: lo define la categoría
+  // (category.productType), así no puede desincronizarse.
   categoryId      String
   category        Category @relation(fields: [categoryId], references: [id])
   rating          Float    @default(0)

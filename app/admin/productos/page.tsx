@@ -20,7 +20,11 @@ export const metadata: Metadata = { title: "Productos" };
 export default async function ProductosPage() {
   const productos = await prisma.product.findMany({
     orderBy: { createdAt: "desc" },
-    include: { category: { select: { nombre: true } } },
+    include: {
+      category: {
+        select: { nombre: true, productType: { select: { label: true } } },
+      },
+    },
   });
 
   return (
@@ -43,6 +47,7 @@ export default async function ProductosPage() {
             <TableHeader>
               <TableRow>
                 <TableHead>Nombre</TableHead>
+                <TableHead>Tipo</TableHead>
                 <TableHead>Categoría</TableHead>
                 <TableHead>Precio</TableHead>
                 <TableHead>Stock</TableHead>
@@ -60,6 +65,9 @@ export default async function ProductosPage() {
                         Nuevo
                       </span>
                     ) : null}
+                  </TableCell>
+                  <TableCell className="text-humo">
+                    {p.category.productType.label}
                   </TableCell>
                   <TableCell className="text-humo">{p.category.nombre}</TableCell>
                   <TableCell>

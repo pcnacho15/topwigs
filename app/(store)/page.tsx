@@ -23,8 +23,8 @@ import {
 } from "@/components/icons";
 import { LENTES } from "@/data/lentes";
 import { SOCIALS, TAGLINE } from "@/data/site";
-import { CATALOGOS } from "@/data/catalogos";
-import { getPublicCategoriesByTipo } from "@/lib/queries/catalog";
+import { catalogoHref } from "@/lib/public-product";
+import { getFeaturedCategories } from "@/lib/queries/catalog";
 import { Footer } from "@/components/layout/footer";
 
 const FEATURES = [
@@ -72,8 +72,9 @@ const SOCIAL_ROWS = [
 ];
 
 export default async function Home() {
-  // Las tarjetas destacadas son categorías de pelucas (enlazan a /pelucas).
-  const categorias = await getPublicCategoriesByTipo("peluca");
+  // Solo las categorías que el admin marcó como destacadas, de cualquier
+  // catálogo. Cada tarjeta enlaza al catálogo de su propio tipo.
+  const destacadas = await getFeaturedCategories();
 
   return (
     <main className="flex flex-1 flex-col">
@@ -82,21 +83,24 @@ export default async function Home() {
 
       <div className="flex flex-col items-center gap-20 px-4 py-16">
         {/* ============ CATEGORÍAS DESTACADAS ============ */}
-        <section className="w-full max-w-6xl space-y-8">
-          <Reveal>
-            <SectionHeading>Categorías destacadas</SectionHeading>
-          </Reveal>
-          <Stagger className="grid grid-cols-2 gap-4 md:grid-cols-4">
-            {categorias.map((c) => (
-              <StaggerItem key={c.slug}>
-                <CategoryCard
-                  categoria={c}
-                  image={c.imagen ?? undefined}
-                />
-              </StaggerItem>
-            ))}
-          </Stagger>
-        </section>
+        {destacadas.length > 0 ? (
+          <section className="w-full max-w-6xl space-y-8">
+            <Reveal>
+              <SectionHeading>Categorías destacadas</SectionHeading>
+            </Reveal>
+            <Stagger className="grid grid-cols-2 gap-4 md:grid-cols-4">
+              {destacadas.map((c) => (
+                <StaggerItem key={c.slug}>
+                  <CategoryCard
+                    categoria={c}
+                    image={c.imagen ?? undefined}
+                    catalogo={catalogoHref(c.tipo.slug)}
+                  />
+                </StaggerItem>
+              ))}
+            </Stagger>
+          </section>
+        ) : null}
 
         {/* ============ ¿POR QUÉ TOPWIGS? ============ */}
         <section className="w-full max-w-6xl space-y-8">
@@ -154,7 +158,9 @@ export default async function Home() {
             ))}
           </Stagger>
           <div className="flex justify-center">
-            <Link href={CATALOGOS.lente.href}>
+            {/* Esta sección todavía muestra el mock de `data/lentes.ts`, por eso
+                el enlace va fijo al catálogo de lentes. */}
+            <Link href="/lentes">
               <Button variant="outline">Ver todos</Button>
             </Link>
           </div>

@@ -8,16 +8,40 @@ const json = (v: unknown) => v as Prisma.InputJsonValue;
 const prisma = new PrismaClient();
 
 async function main() {
-  // Categorías
+  // Tipo de producto: el seed solo cubre el catálogo de pelucas. Los demás
+  // (lentes, y los que vengan) se crean desde el admin.
+  const pelucas = await prisma.productType.upsert({
+    where: { slug: "pelucas" },
+    update: {},
+    create: {
+      slug: "pelucas",
+      nombre: "Peluca",
+      label: "Pelucas",
+      descripcion:
+        "Explora las pelucas TOPWIGS. Fibra seminatural, resistentes al calor.",
+      orden: 0,
+    },
+  });
+
+  // Categorías (todas dentro del catálogo de pelucas)
   for (const [i, c] of CATEGORIAS.entries()) {
     await prisma.category.upsert({
-      where: { slug: c.slug },
+      where: {
+        productTypeId_slug: { productTypeId: pelucas.id, slug: c.slug },
+      },
       update: { nombre: c.nombre, orden: i },
-      create: { slug: c.slug, nombre: c.nombre, orden: i },
+      create: {
+        slug: c.slug,
+        nombre: c.nombre,
+        orden: i,
+        productTypeId: pelucas.id,
+      },
     });
   }
 
-  const categorias = await prisma.category.findMany();
+  const categorias = await prisma.category.findMany({
+    where: { productTypeId: pelucas.id },
+  });
   const idPorSlug = new Map(categorias.map((c) => [c.slug, c.id]));
 
   // Productos
@@ -28,7 +52,6 @@ async function main() {
       nombre: w.nombre,
       descripcion: w.descripcion,
       precioCop: w.precio,
-      tipo: "peluca",
       categoryId,
       rating: w.rating,
       reviews: w.reviews,

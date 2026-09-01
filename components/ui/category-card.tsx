@@ -2,18 +2,17 @@ import Link from "next/link";
 import Image from "next/image";
 import { Card } from "@/components/ui/card";
 import { Heart } from "@/components/icons";
-import { CATALOGOS } from "@/data/catalogos";
 
 /** Tarjeta de categoría destacada (Home). Enlaza al catálogo filtrado. */
 export function CategoryCard({
   categoria,
   image,
-  catalogo = CATALOGOS.peluca.href,
+  catalogo,
 }: {
   categoria: { slug: string; nombre: string };
   image?: string;
-  /** Catálogo al que enlaza (`/pelucas` por defecto). */
-  catalogo?: string;
+  /** Ruta del catálogo al que pertenece la categoría (p. ej. `/pelucas`). */
+  catalogo: string;
 }) {
   return (
     <Link

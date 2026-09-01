@@ -11,7 +11,13 @@ export default async function EditarCategoriaPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const categoria = await prisma.category.findUnique({ where: { id } });
+  const [categoria, tipos] = await Promise.all([
+    prisma.category.findUnique({ where: { id } }),
+    prisma.productType.findMany({
+      orderBy: { orden: "asc" },
+      select: { id: true, label: true },
+    }),
+  ]);
   if (!categoria) notFound();
 
   return (
@@ -22,12 +28,15 @@ export default async function EditarCategoriaPage({
       <CategoryForm
         mode="edit"
         id={categoria.id}
+        tipos={tipos}
         initial={{
+          productTypeId: categoria.productTypeId,
           nombre: categoria.nombre,
           slug: categoria.slug,
           imagen: categoria.imagen,
           orden: categoria.orden,
           activa: categoria.activa,
+          destacada: categoria.destacada,
         }}
       />
     </div>

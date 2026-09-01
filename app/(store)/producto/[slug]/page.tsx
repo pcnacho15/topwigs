@@ -5,7 +5,7 @@ import {
   getPublicProductBySlug,
   getPublicProductsByTipo,
 } from "@/lib/queries/catalog";
-import { catalogoDe } from "@/data/catalogos";
+import { catalogoHref } from "@/lib/public-product";
 import { ProductDetail } from "@/components/sections/product-detail";
 import { ProductCard } from "@/components/ui/product-card";
 import { SectionHeading } from "@/components/ui/section-heading";
@@ -37,10 +37,10 @@ export default async function ProductoPage({
   const product = await getPublicProductBySlug(slug);
   if (!product) notFound();
 
-  const catalogo = catalogoDe(product.tipo);
+  const catalogo = product.tipo;
 
-  // Relacionados dentro del mismo catálogo (no mezclar pelucas con lentes).
-  const all = await getPublicProductsByTipo(catalogo.tipo);
+  // Relacionados dentro del mismo catálogo (no mezclar tipos de producto).
+  const all = await getPublicProductsByTipo(catalogo.slug);
   const related = [
     ...all.filter(
       (p) =>
@@ -60,7 +60,7 @@ export default async function ProductoPage({
         </Link>
         <ChevronRight className="size-3.5" />
         <Link
-          href={catalogo.href}
+          href={catalogoHref(catalogo.slug)}
           className="transition-colors hover:text-neon"
         >
           {catalogo.label}

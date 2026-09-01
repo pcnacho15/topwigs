@@ -19,22 +19,47 @@ import {
 import { Input } from "@/components/shadcn/input";
 import { Switch } from "@/components/shadcn/switch";
 import { Button } from "@/components/shadcn/button";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/shadcn/select";
 import { slugify } from "@/lib/utils";
 
 interface Props {
   mode: "create" | "edit";
   id?: string;
+  /** Tipos de producto disponibles: cada categoría vive dentro de uno. */
+  tipos: { id: string; label: string }[];
+  /** Tipo preseleccionado al crear (viene del botón de cada sección). */
+  defaultTipoId?: string;
   initial?: CategoryInput;
 }
 
-export function CategoryForm({ mode, id, initial }: Props) {
+export function CategoryForm({
+  mode,
+  id,
+  tipos,
+  defaultTipoId,
+  initial,
+}: Props) {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
 
   const form = useForm<CategoryInput>({
     resolver: zodResolver(categorySchema),
     defaultValues:
-      initial ?? { nombre: "", slug: "", imagen: null, orden: 0, activa: true },
+      initial ?? {
+        productTypeId: defaultTipoId ?? tipos[0]?.id ?? "",
+        nombre: "",
+        slug: "",
+        imagen: null,
+        orden: 0,
+        activa: true,
+        destacada: false,
+      },
   });
 
   async function onSubmit(values: CategoryInput) {
@@ -54,6 +79,35 @@ export function CategoryForm({ mode, id, initial }: Props) {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="max-w-lg space-y-6">
+        <FormField
+          control={form.control}
+          name="productTypeId"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Tipo de producto</FormLabel>
+              <Select value={field.value} onValueChange={field.onChange}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecciona un tipo" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {tipos.map((t) => (
+                    <SelectItem key={t.id} value={t.id}>
+                      {t.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormDescription>
+                Catálogo al que pertenece la categoría. Los productos que la
+                usen quedan en ese catálogo.
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
         <FormField
           control={form.control}
           name="nombre"
@@ -87,7 +141,10 @@ export function CategoryForm({ mode, id, initial }: Props) {
               <FormControl>
                 <Input {...field} placeholder="fantasia" />
               </FormControl>
-              <FormDescription>Se usa en la URL del catálogo.</FormDescription>
+              <FormDescription>
+                Se usa en la URL del catálogo. Solo tiene que ser único dentro
+                de su tipo de producto.
+              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -141,6 +198,25 @@ export function CategoryForm({ mode, id, initial }: Props) {
               <div className="space-y-0.5">
                 <FormLabel>Activa</FormLabel>
                 <FormDescription>Visible en la tienda.</FormDescription>
+              </div>
+              <FormControl>
+                <Switch checked={field.value} onCheckedChange={field.onChange} />
+              </FormControl>
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="destacada"
+          render={({ field }) => (
+            <FormItem className="flex items-center justify-between rounded-md border border-linea p-3">
+              <div className="space-y-0.5">
+                <FormLabel>Destacada en el Home</FormLabel>
+                <FormDescription>
+                  Aparece en “Categorías destacadas” del Home, con enlace a su
+                  propio catálogo. Necesita tener al menos un producto.
+                </FormDescription>
               </div>
               <FormControl>
                 <Switch checked={field.value} onCheckedChange={field.onChange} />

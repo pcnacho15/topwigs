@@ -14,8 +14,8 @@ const json = (v: unknown) => v as Prisma.InputJsonValue;
 function revalidate() {
   revalidatePath("/admin/productos");
   revalidatePath("/admin");
-  revalidatePath("/pelucas");
-  revalidatePath("/lentes");
+  // Todos los catálogos: la ruta es dinámica, así que se revalida el patrón.
+  revalidatePath("/[catalogo]", "page");
   revalidatePath("/"); // categorías destacadas (dependen de los productos)
 }
 
@@ -25,7 +25,6 @@ function toData(d: import("@/lib/schemas/product").ProductInput) {
     descripcion: d.descripcion,
     precioCop: d.precioCop,
     precioOfertaCop: d.precioOfertaCop,
-    tipo: d.tipo,
     categoryId: d.categoryId,
     rating: d.rating,
     reviews: d.reviews,
@@ -91,20 +90,28 @@ export async function deleteProducto(id: string): Promise<ActionResult> {
 }
 
 /**
- * Firma una subida directa a Cloudinary (imagen o video).
- * Organiza los archivos en `topwigs/pelucas` o `topwigs/lentes` según el
- * tipo de producto.
+ * Firma una subida directa a Cloudinary (imagen o video). Organiza los
+ * archivos en una carpeta por tipo de producto (`topwigs/pelucas`,
+ * `topwigs/lentes`, …). El slug se valida contra la base de datos: el cliente
+ * no puede inventarse una carpeta.
  */
 export async function signCloudinaryUpload(
   resourceType: "image" | "video",
-  tipo: "peluca" | "lente",
+  tipoSlug: string,
 ) {
   await requireAdmin();
   if (!cloudinaryConfigured()) {
     return { ok: false as const, error: "cloudinary_missing" };
   }
+  const tipo = await prisma.productType.findUnique({
+    where: { slug: tipoSlug },
+    select: { slug: true },
+  });
+  if (!tipo) {
+    return { ok: false as const, error: "tipo_desconocido" };
+  }
   const timestamp = Math.round(Date.now() / 1000);
-  const folder = `topwigs/${tipo === "lente" ? "lentes" : "pelucas"}`;
+  const folder = `topwigs/${tipo.slug}`;
   const signature = cloudinary.utils.api_sign_request(
     { folder, timestamp },
     process.env.CLOUDINARY_API_SECRET as string,

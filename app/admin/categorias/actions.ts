@@ -12,8 +12,8 @@ export type ActionResult = { ok: true } | { ok: false; error: string };
 function revalidate() {
   revalidatePath("/admin/categorias");
   revalidatePath("/admin");
-  revalidatePath("/pelucas");
-  revalidatePath("/lentes");
+  // Todos los catálogos: la ruta es dinámica, así que se revalida el patrón.
+  revalidatePath("/[catalogo]", "page");
   revalidatePath("/"); // tarjetas de categoría del Home
 }
 
@@ -27,7 +27,10 @@ export async function createCategoria(input: unknown): Promise<ActionResult> {
     await prisma.category.create({ data: parsed.data });
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2002") {
-      return { ok: false, error: "Ya existe una categoría con ese slug." };
+      return {
+        ok: false,
+        error: "Ya existe una categoría con ese slug en ese tipo de producto.",
+      };
     }
     throw e;
   }
@@ -48,7 +51,10 @@ export async function updateCategoria(
     await prisma.category.update({ where: { id }, data: parsed.data });
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2002") {
-      return { ok: false, error: "Ya existe una categoría con ese slug." };
+      return {
+        ok: false,
+        error: "Ya existe una categoría con ese slug en ese tipo de producto.",
+      };
     }
     throw e;
   }

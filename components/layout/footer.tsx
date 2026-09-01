@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { Wordmark } from "@/components/ui/wordmark";
 import { Instagram, TikTok, WhatsApp, Mail, Star } from "@/components/icons";
-import { NAV_LINKS, SOCIALS } from "@/data/site";
+import { SOCIALS } from "@/data/site";
+import { getNavLinks } from "@/lib/queries/catalog";
 
 const socialLinks = [
   { key: "ig", href: SOCIALS.instagram.href, label: "Instagram", Icon: Instagram },
@@ -10,7 +11,9 @@ const socialLinks = [
   // { key: "mail", href: SOCIALS.email.href, label: "Correo", Icon: Mail },
 ];
 
-export function Footer() {
+export async function Footer() {
+  const navLinks = await getNavLinks();
+
   return (
     <footer className="mt-auto border-t border-neon/30 bg-surface-1">
       <div className="mx-auto grid w-full max-w-6xl gap-8 px-4 py-12 sm:grid-cols-2 md:grid-cols-3">
@@ -40,7 +43,7 @@ export function Footer() {
             Navegación
           </h3>
           <ul className="space-y-2">
-            {NAV_LINKS.map((link) => (
+            {navLinks.map((link) => (
               <li key={link.href}>
                 <Link
                   href={link.href}

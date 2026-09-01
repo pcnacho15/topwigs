@@ -9,16 +9,18 @@ import { Search, Cart } from "@/components/icons";
 import { UserMenu } from "@/components/layout/user-menu";
 import { AnnouncementBar } from "@/components/layout/announcement-bar";
 import { useCart } from "@/components/cart/cart-context";
-import { NAV_LINKS } from "@/data/site";
+import type { NavLink } from "@/data/site";
 import { cn } from "@/lib/utils";
 
 /**
  * Barra de navegación global: sticky, con links + iconos de acción y
- * menú desplegable en móvil. Marca el link activo según la ruta.
+ * menú desplegable en móvil. Los links llegan por props desde el layout
+ * (servidor), porque dependen de los catálogos en base de datos.
+ * Marca el link activo según la ruta.
  * Micro-animaciones: entrada suave, feedback al tocar iconos y
  * apertura/cierre animado del menú móvil.
  */
-export function Navbar() {
+export function Navbar({ links }: { links: NavLink[] }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const { totalItems, open: openCart } = useCart();
@@ -54,7 +56,7 @@ export function Navbar() {
 
         {/* Links (desktop) */}
         <ul className="hidden items-center gap-7 md:flex">
-          {NAV_LINKS.map((link) => (
+          {links.map((link) => (
             <li key={link.href}>
               <Link
                 href={link.href}
@@ -138,7 +140,7 @@ export function Navbar() {
             transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
             className="flex flex-col gap-1 overflow-hidden border-t border-neon/20 bg-surface-1 px-4 py-3 md:hidden"
           >
-            {NAV_LINKS.map((link) => (
+            {links.map((link) => (
               <li key={link.href}>
                 <Link
                   href={link.href}

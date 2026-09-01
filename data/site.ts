@@ -1,16 +1,16 @@
-/** Configuración global del sitio (mock de Fase 1). */
+/** Configuración global del sitio. */
 
-import { CATALOGOS } from "@/data/catalogos";
 import { FREE_SHIPPING_LABEL } from "@/lib/shipping";
 
-export const NAV_LINKS = [
-  { href: "/", label: "Inicio" },
-  { href: CATALOGOS.peluca.href, label: CATALOGOS.peluca.label },
-  { href: CATALOGOS.lente.href, label: CATALOGOS.lente.label },
-  // { href: "/nuevos", label: "Nuevos" },
-  // { href: "/nosotras", label: "Sobre TOPWIGS" },
-  // { href: "/contacto", label: "Contacto" },
-] as const;
+/**
+ * Los links de navegación ya no viven aquí: se arman desde los tipos de
+ * producto que el admin tenga activos (`getNavLinks` en
+ * `lib/queries/catalog.ts`), para que un catálogo nuevo aparezca solo.
+ */
+export interface NavLink {
+  href: string;
+  label: string;
+}
 
 export const SOCIALS = {
   instagram: {
