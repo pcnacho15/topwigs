@@ -25,11 +25,3 @@ export interface Wig {
   features: string[];
   nuevo?: boolean;
 }
-
-/** Lente de contacto. */
-export interface Lente {
-  slug: string;
-  nombre: string;
-  precio: number; // en COP
-  hex: string; // color aproximado para el swatch/placeholder
-}

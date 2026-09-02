@@ -1,12 +1,11 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { RetroWindow } from "@/components/ui/retro-window";
 import { SectionHeading } from "@/components/ui/section-heading";
-import { PriceTag } from "@/components/ui/price";
 import { CategoryCard } from "@/components/ui/category-card";
+import { LensCategoryCard } from "@/components/ui/lens-category-card";
 import { Hero } from "@/components/sections/hero";
 import { ContactForm } from "@/components/sections/contact-form";
 import { Reveal } from "@/components/motion/reveal";
@@ -19,12 +18,14 @@ import {
   Instagram,
   TikTok,
   WhatsApp,
-  Sparkle,
 } from "@/components/icons";
-import { LENTES } from "@/data/lentes";
 import { SOCIALS, TAGLINE } from "@/data/site";
 import { catalogoHref } from "@/lib/public-product";
-import { getFeaturedCategories } from "@/lib/queries/catalog";
+import {
+  getCatalogo,
+  getFeaturedCategories,
+  getPublicCategoriesByTipo,
+} from "@/lib/queries/catalog";
 import { Footer } from "@/components/layout/footer";
 
 const FEATURES = [
@@ -71,10 +72,17 @@ const SOCIAL_ROWS = [
   },
 ];
 
+/** Catálogo cuyas categorías se muestran en la sección "Lentes de contacto". */
+const TIPO_LENTES = "lentes";
+
 export default async function Home() {
   // Solo las categorías que el admin marcó como destacadas, de cualquier
   // catálogo. Cada tarjeta enlaza al catálogo de su propio tipo.
-  const destacadas = await getFeaturedCategories();
+  const [destacadas, lentes, categoriasLentes] = await Promise.all([
+    getFeaturedCategories(),
+    getCatalogo(TIPO_LENTES),
+    getPublicCategoriesByTipo(TIPO_LENTES),
+  ]);
 
   return (
     <main className="flex flex-1 flex-col">
@@ -126,45 +134,35 @@ export default async function Home() {
         </section>
 
         {/* ============ NUEVO: LENTES DE CONTACTO ============ */}
-        <section className="w-full max-w-6xl space-y-8">
-          <Reveal>
-            <div className="flex flex-wrap items-center justify-center gap-3">
-              <Badge>Nuevo</Badge>
-              <SectionHeading centered={false}>
-                Lentes de contacto
-              </SectionHeading>
+        {/* Solo las categorías (los colores), no los productos: la elección
+            del lente en sí ocurre ya dentro del catálogo. */}
+        {lentes && categoriasLentes.length > 0 ? (
+          <section className="w-full max-w-6xl space-y-8">
+            <Reveal>
+              <div className="flex flex-wrap items-center justify-center gap-3">
+                <Badge>Nuevo</Badge>
+                <SectionHeading centered={false}>
+                  Lentes de contacto
+                </SectionHeading>
+              </div>
+            </Reveal>
+            <Stagger className="grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-6">
+              {categoriasLentes.map((categoria) => (
+                <StaggerItem key={categoria.slug}>
+                  <LensCategoryCard
+                    categoria={categoria}
+                    catalogo={catalogoHref(lentes.slug)}
+                  />
+                </StaggerItem>
+              ))}
+            </Stagger>
+            <div className="flex justify-center">
+              <Link href={catalogoHref(lentes.slug)}>
+                <Button variant="outline">Ver todos</Button>
+              </Link>
             </div>
-          </Reveal>
-          <Stagger className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
-            {LENTES.map((lente) => (
-              <StaggerItem key={lente.slug}>
-                <Card className="p-4 text-center">
-                  <span
-                    className="mx-auto mb-3 block size-16 rounded-full ring-2 ring-neon/40"
-                    style={{
-                      background: `radial-gradient(circle at 50% 40%, ${lente.hex}, #05050a 78%)`,
-                    }}
-                    aria-hidden
-                  />
-                  <h3 className="font-heading text-xs font-bold uppercase tracking-wide">
-                    {lente.nombre}
-                  </h3>
-                  <PriceTag
-                    value={lente.precio}
-                    className="text-sm"
-                  />
-                </Card>
-              </StaggerItem>
-            ))}
-          </Stagger>
-          <div className="flex justify-center">
-            {/* Esta sección todavía muestra el mock de `data/lentes.ts`, por eso
-                el enlace va fijo al catálogo de lentes. */}
-            <Link href="/lentes">
-              <Button variant="outline">Ver todos</Button>
-            </Link>
-          </div>
-        </section>
+          </section>
+        ) : null}
 
         {/* ============ NOSOTRAS / SOBRE LA MARCA ============ */}
         <Reveal className="w-full max-w-6xl">
