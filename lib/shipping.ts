@@ -3,8 +3,7 @@
  * el país, incluida Medellín. Único lugar donde vive este número: si el
  * flete cambia, se actualiza aquí.
  */
-// export const SHIPPING_COST_COP = 18500;
-export const SHIPPING_COST_COP = 1;
+export const SHIPPING_COST_COP = 18500;
 
 /** A partir de este subtotal (productos, sin flete) el envío no se cobra. */
 export const FREE_SHIPPING_THRESHOLD_COP = 499_000;
