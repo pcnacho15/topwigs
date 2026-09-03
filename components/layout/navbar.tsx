@@ -132,31 +132,36 @@ export function Navbar({ links }: { links: NavLink[] }) {
       {/* Menú móvil (animado) */}
       <AnimatePresence initial={false}>
         {open ? (
-          <m.ul
+          <m.div
             key="mobile-menu"
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
-            className="flex flex-col gap-1 overflow-hidden border-t border-neon/20 bg-surface-1 px-4 py-3 md:hidden"
+            className="overflow-hidden md:hidden"
           >
-            {links.map((link) => (
-              <li key={link.href}>
-                <Link
-                  href={link.href}
-                  onClick={() => setOpen(false)}
-                  className={cn(
-                    "block rounded-goth px-3 py-2.5 font-heading text-sm font-semibold uppercase tracking-wide",
-                    isActive(link.href)
-                      ? "bg-neon/10 text-neon"
-                      : "text-humo hover:bg-white/5 hover:text-blanco",
-                  )}
-                >
-                  {link.label}
-                </Link>
-              </li>
-            ))}
-          </m.ul>
+            {/* El padding y el borde van aquí dentro: en el elemento animado
+                seguirían ocupando alto con height: 0 y el menú daría un
+                salto justo antes de desaparecer. */}
+            <ul className="flex flex-col gap-1 border-t border-neon/20 bg-surface-1 px-4 py-3">
+              {links.map((link) => (
+                <li key={link.href}>
+                  <Link
+                    href={link.href}
+                    onClick={() => setOpen(false)}
+                    className={cn(
+                      "block rounded-goth px-3 py-2.5 font-heading text-sm font-semibold uppercase tracking-wide",
+                      isActive(link.href)
+                        ? "bg-neon/10 text-neon"
+                        : "text-humo hover:bg-white/5 hover:text-blanco",
+                    )}
+                  >
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </m.div>
         ) : null}
       </AnimatePresence>
     </m.header>

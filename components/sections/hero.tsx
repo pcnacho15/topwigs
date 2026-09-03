@@ -82,7 +82,11 @@ export function Hero() {
       animate="show"
     >
       {/* Estrellas decorativas con twinkle */}
-      <m.div className="absolute left-[30%] top-10" animate={twinkle} transition={twinkleT}>
+      <m.div
+        className="absolute left-[30%] top-10"
+        animate={twinkle}
+        transition={twinkleT}
+      >
         <Star className="size-6 text-neon/70" />
       </m.div>
       <m.div
@@ -180,7 +184,11 @@ export function Hero() {
         </m.p>
 
         {/* CTA interactivo (z alto para que quede por encima de dolls/wordmark) */}
-        <m.div variants={fadeUp} whileTap={{ scale: 0.97 }} className="relative z-60">
+        <m.div
+          variants={fadeUp}
+          whileTap={{ scale: 0.97 }}
+          className="relative z-60"
+        >
           <Link
             href="/pelucas"
             className="cursor-pointer z-auto group relative inline-flex items-center gap-3 rounded-xl border border-neon bg-noir/60 px-4 font-heading text-sm font-bold uppercase tracking-widest text-blanco shadow-[0_0_22px_-4px_rgba(255,47,146,0.7)] transition-all hover:bg-neon/50 hover:text-noir hover:shadow-[0_0_30px_-2px_rgba(255,47,146,0.9)]"
@@ -192,12 +200,15 @@ export function Hero() {
       </m.div>
 
       {/* Barra de beneficios */}
-      <m.div variants={fadeUp} className="relative z-50 mx-auto mb-6 max-w-4xl px-4">
-        <ul className="flex flex-wrap items-center justify-center gap-x-6 gap-y-3 rounded-full border border-neon/50 bg-noir/70 px-6 py-3 backdrop-blur-sm">
+      <m.div
+        variants={fadeUp}
+        className="relative z-50 mx-auto mb-6 max-w-4xl px-4"
+      >
+        <ul className="flex flex-wrap items-center justify-center gap-x-6 gap-y-3 rounded-full border border-transparent sm:border-neon/50 bg-none sm:bg-noir/70 px-6 py-3 backdrop-blur-sm">
           {BENEFICIOS.map(({ Icon, label }) => (
             <li
               key={label}
-              className="flex items-center gap-2 font-heading text-[11px] font-semibold uppercase tracking-wide text-humo sm:text-xs"
+              className="flex items-center justify-center sm:justify-start w-full sm:w-auto gap-2 font-heading text-[11px] font-semibold uppercase tracking-wide text-humo sm:text-xs"
             >
               <Icon className="size-4 shrink-0 text-neon" />
               {label}
