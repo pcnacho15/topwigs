@@ -4,11 +4,14 @@ import { requireUser } from "@/lib/auth-guard";
 import { RetroWindow } from "@/components/ui/retro-window";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { Button } from "@/components/ui/button";
+import { SavedAddressCard } from "@/components/account/saved-address-card";
+import { getSavedCustomerInfo } from "@/app/(store)/checkout/customer-actions";
 
 export const metadata: Metadata = { title: "Mi perfil" };
 
 export default async function CuentaPage() {
   const session = await requireUser();
+  const savedInfo = await getSavedCustomerInfo();
 
   return (
     <main className="mx-auto w-full max-w-2xl space-y-8 px-4 py-12">
@@ -24,6 +27,8 @@ export default async function CuentaPage() {
           </div>
         </div>
       </RetroWindow>
+
+      <SavedAddressCard initial={savedInfo} />
     </main>
   );
 }
