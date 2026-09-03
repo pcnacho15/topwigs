@@ -24,6 +24,7 @@ interface OrderStatusEmailParams {
   reference: string;
   subtotalCop: number;
   shippingCop: number;
+  ivaCop: number;
   totalCop: number;
   items: OrderItem[];
   status: "APPROVED" | "DECLINED" | "VOIDED" | "ERROR";
@@ -101,6 +102,10 @@ function buildOrderEmailHtml(params: OrderStatusEmailParams, isApproved: boolean
               ? "Gratis"
               : copFormatter.format(params.shippingCop)
           }</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;color:#999;font-size:13px;padding:2px 0;">
+          <span>IVA</span>
+          <span style="float:right;">${copFormatter.format(params.ivaCop)}</span>
         </div>
         <div style="display:flex;justify-content:space-between;padding-top:8px;">
           <span style="color:#999;font-size:13px;">Total</span>

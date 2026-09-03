@@ -13,6 +13,7 @@ import {
   FREE_SHIPPING_THRESHOLD_COP,
   shippingCostFor,
 } from "@/lib/shipping";
+import { ivaCopFor } from "@/lib/iva";
 import { estimateDelivery } from "@/lib/delivery";
 import { ShippingSteps } from "@/components/ui/shipping-steps";
 import { createWompiCheckout } from "./actions";
@@ -22,7 +23,8 @@ export default function CheckoutPage() {
   const { items, subtotal, hydrated } = useCart();
   // Mismo cálculo que usa el servidor al crear la orden.
   const shipping = shippingCostFor(subtotal);
-  const total = subtotal + shipping;
+  const iva = ivaCopFor(subtotal + shipping);
+  const total = subtotal + shipping + iva;
   const faltaParaEnvioGratis = FREE_SHIPPING_THRESHOLD_COP - subtotal;
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -280,6 +282,10 @@ export default function CheckoutPage() {
                     gratis.
                   </p>
                 ) : null} */}
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-humo">IVA</span>
+                  <span className="text-blanco">{formatCOP(iva)}</span>
+                </div>
                 <div className="flex items-center justify-between pt-2">
                   <span className="font-heading uppercase tracking-wide text-humo">
                     Total

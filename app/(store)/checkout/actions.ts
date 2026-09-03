@@ -5,6 +5,7 @@ import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { getSession } from "@/lib/auth-guard";
 import { shippingCostFor } from "@/lib/shipping";
+import { ivaCopFor } from "@/lib/iva";
 
 interface CheckoutItem {
   slug: string;
@@ -91,7 +92,8 @@ export async function createWompiCheckout(input: {
   // Flete plano (Interrápidísimo) — mismo costo a todo el país, o gratis
   // si el subtotal (ya recalculado con precios de la BD) llega al umbral.
   const shippingCop = shippingCostFor(subtotalCop);
-  const totalCop = subtotalCop + shippingCop;
+  const ivaCop = ivaCopFor(subtotalCop + shippingCop);
+  const totalCop = subtotalCop + shippingCop + ivaCop;
 
   const reference = `TOPWIGS-${Date.now()}-${Math.random()
     .toString(36)
@@ -115,6 +117,7 @@ export async function createWompiCheckout(input: {
       items: json(snapshot),
       subtotalCop,
       shippingCop,
+      ivaCop,
       totalCop,
       status: "PENDING",
     },

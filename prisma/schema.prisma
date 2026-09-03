@@ -94,7 +94,8 @@ model Order {
   items              Json // snapshot: {slug,nombre,precio,color,qty}[]
   subtotalCop        Int      @default(0) // suma de los productos, sin envío
   shippingCop        Int      @default(0) // flete (Interrápidísimo)
-  totalCop           Int // subtotalCop + shippingCop; monto realmente cobrado
+  ivaCop             Int      @default(0) // "IVA": comisión de Wompi (2.65%+700, +19% IVA) sobre subtotal+envío, ver lib/iva.ts
+  totalCop           Int // subtotalCop + shippingCop + ivaCop; monto realmente cobrado
   status             String   @default("PENDING") // PENDING|APPROVED|DECLINED|VOIDED|ERROR
   wompiTransactionId String?
   createdAt          DateTime @default(now())

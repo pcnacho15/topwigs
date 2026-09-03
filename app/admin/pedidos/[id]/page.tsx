@@ -91,6 +91,10 @@ export default async function PedidoDetallePage({
                 <span className="text-humo">Envío · Interrápidísimo</span>
                 <span className="text-blanco">{formatCOP(pedido.shippingCop)}</span>
               </div>
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-humo">IVA</span>
+                <span className="text-blanco">{formatCOP(pedido.ivaCop)}</span>
+              </div>
               <div className="flex items-center justify-between pt-1.5">
                 <span className="font-heading uppercase tracking-wide text-humo">Total</span>
                 <span className="font-heading text-xl font-bold text-glow">
