@@ -27,7 +27,7 @@ export function CategoryCard({
               alt={`Categoría ${categoria.nombre}`}
               fill
               sizes="(max-width: 768px) 50vw, 25vw"
-              className="object-contain object-bottom drop-shadow-[0_0_18px_rgba(255,47,146,0.35)] transition-transform duration-300 group-hover:scale-105"
+              className="object-cover drop-shadow-[0_0_18px_rgba(255,47,146,0.35)] transition-transform duration-300 group-hover:scale-105"
             />
           ) : null}
         </div>
