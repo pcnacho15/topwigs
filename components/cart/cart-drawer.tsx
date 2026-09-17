@@ -38,7 +38,7 @@ export function CartDrawer() {
           <button
             aria-label="Cerrar carrito"
             onClick={close}
-            className="absolute inset-0 bg-noir/70 backdrop-blur-sm"
+            className="absolute inset-0 bg-black/70 backdrop-blur-sm"
           />
 
           {/* Panel */}
@@ -88,7 +88,7 @@ export function CartDrawer() {
                       <span
                         className="size-16 shrink-0 rounded-goth border border-linea"
                         style={{
-                          background: `radial-gradient(120% 100% at 50% 0%, ${item.colorHex}, #0a0a0d 82%)`,
+                          background: `radial-gradient(120% 100% at 50% 0%, ${item.colorHex}, var(--color-surface-3) 82%)`,
                         }}
                         aria-hidden
                       />

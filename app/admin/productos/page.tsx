@@ -61,7 +61,7 @@ export default async function ProductosPage() {
                   <TableCell className="font-semibold text-blanco">
                     {p.nombre}
                     {p.nuevo ? (
-                      <span className="ml-2 rounded-full bg-neon px-2 py-0.5 text-[9px] font-bold uppercase text-noir">
+                      <span className="ml-2 rounded-full bg-neon px-2 py-0.5 text-[9px] font-bold uppercase text-ink">
                         Nuevo
                       </span>
                     ) : null}

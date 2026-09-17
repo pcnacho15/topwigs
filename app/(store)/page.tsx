@@ -209,7 +209,7 @@ export default async function Home() {
         </Reveal>
 
         {/* ============ SÍGUENOS + CONTACTO ============ */}
-        <section className="grid w-full max-w-6xl gap-8 md:grid-cols-2">
+        {/* <section className="grid w-full max-w-6xl gap-8 md:grid-cols-2">
           <Reveal className="space-y-6">
             <SectionHeading centered={false}>Síguenos</SectionHeading>
             <ul className="space-y-4">
@@ -247,7 +247,7 @@ export default async function Home() {
               </div>
             </RetroWindow>
           </Reveal>
-        </section>
+        </section> */}
 
         <Reveal>
           <p className="font-pixel text-[10px] uppercase text-humo/60">

@@ -41,8 +41,8 @@ const COLOR_POR_NOMBRE: Record<string, string> = {
 function irisBackground(nombre: string): string {
   const hex = COLOR_POR_NOMBRE[nombre.trim().toLowerCase()];
   return hex
-    ? `radial-gradient(circle at 50% 40%, ${hex}, #05050a 78%)`
-    : "radial-gradient(circle at 50% 40%, rgba(186,43,226,0.9), rgba(255,47,146,0.5) 45%, #05050a 80%)";
+    ? `radial-gradient(circle at 50% 40%, ${hex}, var(--color-surface-3) 78%)`
+    : "radial-gradient(circle at 50% 40%, rgba(186,43,226,0.9), rgba(255,47,146,0.5) 45%, var(--color-surface-3) 80%)";
 }
 
 /**

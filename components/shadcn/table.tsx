@@ -35,7 +35,7 @@ function TableRow({
   return (
     <tr
       className={cn(
-        "border-b border-linea transition-colors hover:bg-white/5",
+        "border-b border-linea transition-colors hover:bg-linea/40",
         className,
       )}
       {...props}

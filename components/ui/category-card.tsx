@@ -20,7 +20,7 @@ export function CategoryCard({
       className="group block"
     >
       <Card className="overflow-hidden">
-        <div className="relative aspect-[3/4] bg-[radial-gradient(120%_100%_at_50%_0%,rgba(186,43,226,0.28),rgba(255,47,146,0.12)_45%,#0a0a0d_82%)]">
+        <div className="relative aspect-3/4 bg-[radial-gradient(120%_100%_at_50%_0%,rgba(186,43,226,0.28),rgba(255,47,146,0.12)_45%,var(--color-surface-3)_82%)]">
           {image ? (
             <Image
               src={image}
@@ -31,12 +31,12 @@ export function CategoryCard({
             />
           ) : null}
         </div>
-        <div className="flex items-center justify-center gap-2 p-3">
+        {/* <div className="flex items-center justify-center gap-2 p-3">
           <h3 className="font-heading text-lg font-bold uppercase tracking-wide">
             {categoria.nombre}
           </h3>
           <Heart className="size-4 text-neon" />
-        </div>
+        </div> */}
       </Card>
     </Link>
   );

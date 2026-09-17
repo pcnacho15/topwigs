@@ -91,7 +91,7 @@ export function CatalogView({
                     className={cn(
                       "cursor-pointer rounded-full px-4 py-1.5 font-heading text-xs font-semibold uppercase tracking-wide transition-colors",
                       categoria === t.slug
-                        ? "bg-neon text-noir"
+                        ? "bg-neon text-ink"
                         : "border border-neon/40 text-humo hover:border-neon hover:text-neon",
                     )}
                   >
@@ -161,7 +161,7 @@ export function CatalogView({
                     className={cn(
                       "grid size-8 cursor-pointer place-items-center rounded-full font-heading text-sm transition-colors",
                       i === current
-                        ? "bg-neon text-noir"
+                        ? "bg-neon text-ink"
                         : "border border-neon/40 text-humo hover:text-neon",
                     )}
                   >

@@ -84,7 +84,7 @@ export function ProductDetail({
           style={
             media.length === 0
               ? {
-                  background: `radial-gradient(120% 100% at 50% 0%, ${activeCss}, #0a0a0d 80%)`,
+                  background: `radial-gradient(120% 100% at 50% 0%, ${activeCss}, var(--color-surface-3) 80%)`,
                 }
               : undefined
           }
@@ -128,7 +128,7 @@ export function ProductDetail({
               />
             )
           ) : (
-            <HeartDrip className="size-20 text-white/40" />
+            <HeartDrip className="size-20 text-humo/50" />
           )}
         </div>
 

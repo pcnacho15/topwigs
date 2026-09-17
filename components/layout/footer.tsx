@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Wordmark } from "@/components/ui/wordmark";
+import { Logo } from "@/components/ui/logo";
 import { Instagram, TikTok, WhatsApp, Mail, Star } from "@/components/icons";
 import { SOCIALS } from "@/data/site";
 import { getNavLinks } from "@/lib/queries/catalog";
@@ -18,11 +18,8 @@ export async function Footer() {
     <footer className="mt-auto border-t border-neon/30 bg-surface-1">
       <div className="mx-auto grid w-full max-w-6xl gap-8 px-4 py-12 sm:grid-cols-2 md:grid-cols-3">
         <div className="space-y-3">
-          <Wordmark height={40} />
-          <p className="font-heading text-sm uppercase tracking-wide text-humo">
-            Stay in touch!
-          </p>
-          <div className="flex items-center gap-3 text-neon">
+          <Logo />
+          <div className="flex items-center gap-3 text-neon mt-2">
             {socialLinks.map(({ key, href, label, Icon }) => (
               <a
                 key={key}
@@ -30,7 +27,7 @@ export async function Footer() {
                 aria-label={label}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="grid size-9 place-items-center rounded-full border border-neon/50 transition-colors hover:bg-neon hover:text-noir"
+                className="grid size-9 place-items-center rounded-full border border-neon/50 transition-colors hover:bg-neon hover:text-ink"
               >
                 <Icon className="size-4" />
               </a>

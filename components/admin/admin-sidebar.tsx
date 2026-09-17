@@ -12,6 +12,7 @@ import {
   LogOut,
 } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { cn } from "@/lib/utils";
 
 const LINKS = [
@@ -37,13 +38,16 @@ export function AdminSidebar({ userName }: { userName: string }) {
 
   return (
     <aside className="flex w-60 shrink-0 flex-col border-r border-linea bg-surface-1 p-4">
-      <div className="mb-6 px-2">
-        <span className="wordmark text-xl text-neon">
-          TOP<span className="text-blanco">WIGS</span>
-        </span>
-        <p className="font-pixel text-[8px] uppercase tracking-widest text-humo">
-          admin
-        </p>
+      <div className="mb-6 flex items-start justify-between px-2">
+        <div>
+          <span className="wordmark text-xl text-neon">
+            TOP<span className="text-blanco">WIGS</span>
+          </span>
+          <p className="font-pixel text-[8px] uppercase tracking-widest text-humo">
+            admin
+          </p>
+        </div>
+        <ThemeToggle className="mt-1" />
       </div>
 
       <nav className="flex-1 space-y-1">
@@ -55,7 +59,7 @@ export function AdminSidebar({ userName }: { userName: string }) {
               "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
               isActive(href, exact)
                 ? "bg-neon/15 text-neon"
-                : "text-humo hover:bg-white/5 hover:text-blanco",
+                : "text-humo hover:bg-linea/40 hover:text-blanco",
             )}
           >
             <Icon className="size-4" />

@@ -3,7 +3,7 @@ import { Suspense } from "react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth-guard";
-import { Wordmark } from "@/components/ui/wordmark";
+import { Logo } from "@/components/ui/logo";
 import { LoginForm } from "@/components/auth/login-form";
 
 export const metadata: Metadata = { title: "Iniciar sesión" };
@@ -15,7 +15,7 @@ export default async function LoginPage() {
   return (
     <main className="mx-auto flex min-h-[70vh] w-full max-w-md flex-col items-center justify-center gap-6 px-4 py-12">
       <Link href="/" aria-label="TOPWIGS — inicio">
-        <Wordmark height={40} />
+        <Logo size="lg" />
       </Link>
       <div className="w-full">
         <Suspense fallback={<div className="h-96" />}>

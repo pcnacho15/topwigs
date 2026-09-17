@@ -60,7 +60,7 @@ export function CategoryImageUploader({
               type="button"
               onClick={() => onChange(null)}
               aria-label="Quitar"
-              className="absolute right-1 top-1 grid size-6 place-items-center rounded-full bg-noir/80 text-humo transition-colors hover:text-red-500"
+              className="absolute right-1 top-1 grid size-6 place-items-center rounded-full bg-black/80 text-white/80 transition-colors hover:text-red-500"
             >
               <X className="size-3.5" />
             </button>

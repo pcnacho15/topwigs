@@ -61,7 +61,7 @@ export function MediaPicker({
               <video src={url} muted playsInline className="size-full object-cover" />
             )}
             {selected ? (
-              <span className="absolute right-1 top-1 grid size-5 place-items-center rounded-full bg-neon text-noir">
+              <span className="absolute right-1 top-1 grid size-5 place-items-center rounded-full bg-neon text-ink">
                 <Check className="size-3" />
               </span>
             ) : null}

@@ -19,7 +19,7 @@ export function ImagePlaceholder({
       className={cn(
         ratio,
         "flex flex-col items-center justify-center gap-2 rounded-goth",
-        "bg-[radial-gradient(120%_100%_at_50%_0%,rgba(186,43,226,0.25),rgba(255,47,146,0.12)_45%,#0a0a0d_85%)]",
+        "bg-[radial-gradient(120%_100%_at_50%_0%,rgba(186,43,226,0.25),rgba(255,47,146,0.12)_45%,var(--color-surface-3)_85%)]",
         "border border-linea text-neon/50",
         className,
       )}

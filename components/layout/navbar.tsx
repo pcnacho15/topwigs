@@ -4,8 +4,9 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { m, AnimatePresence } from "motion/react";
-import { Wordmark } from "@/components/ui/wordmark";
+import { Logo } from "@/components/ui/logo";
 import { Search, Cart } from "@/components/icons";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { UserMenu } from "@/components/layout/user-menu";
 import { AnnouncementBar } from "@/components/layout/announcement-bar";
 import { useCart } from "@/components/cart/cart-context";
@@ -43,15 +44,40 @@ export function Navbar({ links }: { links: NavLink[] }) {
       <AnnouncementBar />
 
       <nav className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between gap-4 px-4">
+        {/* Hamburguesa (móvil) */}
+        <m.button
+          aria-label={open ? "Cerrar menú" : "Abrir menú"}
+          aria-expanded={open}
+          onClick={() => setOpen((v) => !v)}
+          whileTap={{ scale: 0.9 }}
+          className="ml-1 flex flex-col gap-1.5 md:hidden"
+        >
+          <span
+            className={cn(
+              "h-0.5 w-6 bg-neon transition-transform",
+              open && "translate-y-2 rotate-45",
+            )}
+          />
+          <span
+            className={cn(
+              "h-0.5 w-6 bg-neon transition-opacity",
+              open && "opacity-0",
+            )}
+          />
+          <span
+            className={cn(
+              "h-0.5 w-6 bg-neon transition-transform",
+              open && "-translate-y-2 -rotate-45",
+            )}
+          />
+        </m.button>
+
         <Link
           href="/"
           aria-label="TOPWIGS — inicio"
           className="shrink-0"
         >
-          <Wordmark
-            height={30}
-            priority
-          />
+          <Logo size="sm" />
         </Link>
 
         {/* Links (desktop) */}
@@ -83,6 +109,7 @@ export function Navbar({ links }: { links: NavLink[] }) {
           >
             <Search className="size-7 cursor-pointer" />
           </m.button> */}
+          <ThemeToggle />
           <m.button
             aria-label={`Carrito (${totalItems})`}
             onClick={openCart}
@@ -92,40 +119,12 @@ export function Navbar({ links }: { links: NavLink[] }) {
           >
             <Cart className="size-7 cursor-pointer" />
             {totalItems > 0 ? (
-              <span className="absolute -right-2 -top-2 grid size-4 place-items-center rounded-full bg-neon text-[9px] font-bold text-noir">
+              <span className="absolute -right-2 -top-2 grid size-4 place-items-center rounded-full bg-neon text-[9px] font-bold text-ink">
                 {totalItems > 9 ? "9+" : totalItems}
               </span>
             ) : null}
           </m.button>
           <UserMenu />
-
-          {/* Hamburguesa (móvil) */}
-          <m.button
-            aria-label={open ? "Cerrar menú" : "Abrir menú"}
-            aria-expanded={open}
-            onClick={() => setOpen((v) => !v)}
-            whileTap={{ scale: 0.9 }}
-            className="ml-1 flex flex-col gap-1.5 md:hidden"
-          >
-            <span
-              className={cn(
-                "h-0.5 w-6 bg-neon transition-transform",
-                open && "translate-y-2 rotate-45",
-              )}
-            />
-            <span
-              className={cn(
-                "h-0.5 w-6 bg-neon transition-opacity",
-                open && "opacity-0",
-              )}
-            />
-            <span
-              className={cn(
-                "h-0.5 w-6 bg-neon transition-transform",
-                open && "-translate-y-2 -rotate-45",
-              )}
-            />
-          </m.button>
         </div>
       </nav>
 
@@ -153,7 +152,7 @@ export function Navbar({ links }: { links: NavLink[] }) {
                       "block rounded-goth px-3 py-2.5 font-heading text-sm font-semibold uppercase tracking-wide",
                       isActive(link.href)
                         ? "bg-neon/10 text-neon"
-                        : "text-humo hover:bg-white/5 hover:text-blanco",
+                        : "text-humo hover:bg-linea/40 hover:text-blanco",
                     )}
                   >
                     {link.label}

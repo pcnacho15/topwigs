@@ -12,12 +12,12 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 const variants: Record<Variant, string> = {
   // Relleno neón con resplandor
   primary:
-    "bg-neon text-noir font-semibold shadow-[0_0_18px_-2px_rgba(255,47,146,0.6)] hover:bg-neon-soft hover:shadow-[0_0_26px_-2px_rgba(255,47,146,0.8)]",
+    "bg-neon text-ink font-semibold shadow-[0_0_18px_-2px_rgba(255,47,146,0.6)] hover:bg-neon-soft hover:shadow-[0_0_26px_-2px_rgba(255,47,146,0.8)]",
   // Contorno neón sobre transparente
   outline:
     "border border-neon/70 text-neon hover:bg-neon/10 hover:border-neon",
   // Sin borde, texto claro
-  ghost: "text-humo hover:text-blanco hover:bg-white/5",
+  ghost: "text-humo hover:text-blanco hover:bg-linea/40",
 };
 
 const sizes: Record<Size, string> = {

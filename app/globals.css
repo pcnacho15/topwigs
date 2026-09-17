@@ -7,20 +7,28 @@
    ============================================================ */
 
 @theme {
-  /* --- Paleta de marca (de plantilla.jpeg) --- */
-  --color-noir: #000000; /* negro base */
+  /* --- Paleta de marca (de plantilla.jpeg) ---
+     neon/neon-soft/violeta son la identidad de marca: se mantienen
+     idénticos en claro y oscuro. noir/blanco/humo/surface(-1,-2,-3)/linea son
+     tokens semánticos (fondo base, texto, superficies) cuyo valor real
+     vive en variables planas (--noir, --blanco…) redefinidas más abajo
+     según el tema activo; por eso aquí solo los referencian con var(). */
+  --color-noir: var(--noir);
   --color-neon: #ff2f92; /* rosa neón principal */
   --color-neon-soft: #ff7ab8; /* rosa suave para hovers/acentos */
-  --color-blanco: #ffffff;
-  --color-humo: #bababa; /* gris texto secundario */
+  --color-blanco: var(--blanco);
+  --color-humo: var(--humo); /* gris texto secundario */
   --color-violeta: #ba2be2; /* violeta acento */
+  /* Negro fijo (no cambia con el tema): texto/iconos con contraste
+     garantizado sobre superficies de acento (bg-neon, bg-violeta). */
+  --color-ink: #000000;
 
-  /* --- Superficies (derivadas del negro) --- */
-  --color-surface: #0a0a0d; /* fondo de secciones */
-  --color-surface-1: #0c0c0f; /* paneles */
-  --color-surface-2: #14141a; /* tarjetas */
-  --color-surface-3: #1c1c24; /* elementos elevados */
-  --color-linea: #2a2a33; /* bordes sutiles */
+  /* --- Superficies (derivadas del fondo base) --- */
+  --color-surface: var(--surface); /* fondo de secciones */
+  --color-surface-1: var(--surface-1); /* paneles */
+  --color-surface-2: var(--surface-2); /* tarjetas */
+  --color-surface-3: var(--surface-3); /* elementos elevados */
+  --color-linea: var(--linea); /* bordes sutiles */
 
   /* --- Tipografías (self-hosted vía next/font en layout.tsx) --- */
   --font-heading: var(--font-montserrat), system-ui, sans-serif;
@@ -53,12 +61,54 @@
 }
 
 /* ============================================================
-   Base
+   Tema claro/oscuro
+   Mismos tokens semánticos (noir/blanco/humo/surface(-1,-2,-3)/linea), valores
+   distintos. El toggle alterna la clase en <html>; por defecto (sin
+   clase, o con "dark") se sirve el tema oscuro original.
    ============================================================ */
-:root {
+:root,
+.dark {
   color-scheme: dark;
+  --noir: #000000;
+  --blanco: #ffffff;
+  --humo: #bababa;
+  --surface: #0a0a0d;
+  --surface-1: #0c0c0f;
+  --surface-2: #14141a;
+  --surface-3: #1c1c24;
+  --linea: #2a2a33;
 }
 
+.light {
+  color-scheme: light;
+  --noir: #fdf7fb;
+  --blanco: #171319;
+  --humo: #706a78;
+  --surface: #ffffff;
+  --surface-1: #f8f2f7;
+  --surface-2: #f1e9f0;
+  --surface-3: #e8dde7;
+  --linea: #ddd0dc;
+}
+
+/* Ancla piezas de marca (el Hero) al tema oscuro original sin importar
+   el toggle: llevan assets (logo, barcode) pensados solo para fondo
+   negro. */
+@utility panel-dark {
+  color-scheme: dark;
+  --noir: #000000;
+  --blanco: #ffffff;
+  --humo: #bababa;
+  --surface: #0a0a0d;
+  --surface-1: #0c0c0f;
+  --surface-2: #14141a;
+  --surface-3: #1c1c24;
+  --linea: #2a2a33;
+}
+
+/* ============================================================
+   Base
+   ============================================================ */
 body {
   background-color: var(--color-noir);
   color: var(--color-blanco);
@@ -80,7 +130,7 @@ body {
 
 ::selection {
   background: var(--color-neon);
-  color: var(--color-noir);
+  color: var(--color-ink);
 }
 
 /* Foco accesible coherente con la marca */

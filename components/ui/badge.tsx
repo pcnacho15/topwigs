@@ -8,10 +8,10 @@ interface BadgeProps extends HTMLAttributes<HTMLSpanElement> {
 }
 
 const tones: Record<Tone, string> = {
-  neon: "bg-neon text-noir",
+  neon: "bg-neon text-ink",
   violeta: "bg-violeta text-blanco",
   outline: "border border-neon/60 text-neon",
-  agotado: "border border-linea bg-noir/80 text-humo",
+  agotado: "border border-white/10 bg-black/70 text-white/80",
 };
 
 /** Etiqueta corta: filtros, "NUEVO", categorías. */
