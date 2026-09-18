@@ -72,6 +72,7 @@ function mapProduct(p: ProductWithCategory): PublicProduct {
     agotado: !p.activo || p.stock <= 0,
     colores: normalizeColores(p.colores, imagenes, videos),
     features: (p.features as unknown as string[]) ?? [],
+    tips: (p.tips as unknown as string[]) ?? [],
     imagenes,
     videos,
   };

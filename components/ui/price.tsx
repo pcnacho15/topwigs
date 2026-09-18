@@ -24,7 +24,7 @@ export function PriceTag({ value, showCurrency, className }: PriceTagProps) {
   return (
     <span className={cn("font-heading font-bold text-blanco", className)}>
       {formatCOP(value)}
-      {showCurrency && <span className="ml-1 text-humo">COP</span>}
+      {/* {showCurrency && <span className="ml-1 text-humo">COP</span>} */}
     </span>
   );
 }

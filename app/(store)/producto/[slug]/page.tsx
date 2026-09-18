@@ -7,10 +7,11 @@ import {
 } from "@/lib/queries/catalog";
 import { catalogoHref } from "@/lib/public-product";
 import { ProductDetail } from "@/components/sections/product-detail";
+import { ProductReviews } from "@/components/sections/product-reviews";
 import { ProductCard } from "@/components/ui/product-card";
 import { SectionHeading } from "@/components/ui/section-heading";
+import { Carousel, CarouselItem } from "@/components/ui/carousel";
 import { Reveal } from "@/components/motion/reveal";
-import { Stagger, StaggerItem } from "@/components/motion/stagger";
 import { ChevronRight } from "@/components/icons";
 import { estimateDelivery } from "@/lib/delivery";
 
@@ -47,7 +48,7 @@ export default async function ProductoPage({
         p.categoria.slug === product.categoria.slug && p.slug !== product.slug,
     ),
     ...all.filter((p) => p.categoria.slug !== product.categoria.slug),
-  ].slice(0, 4);
+  ].slice(0, 10);
 
   return (
     <main className="mx-auto w-full max-w-6xl space-y-16 px-4 py-12">
@@ -75,18 +76,29 @@ export default async function ProductoPage({
         <ProductDetail product={product} envio={estimateDelivery()} />
       </Reveal>
 
+      <Reveal>
+        <ProductReviews
+          productId={product.id}
+          productSlug={product.slug}
+          rating={product.rating}
+          reviewCount={product.reviews}
+        />
+      </Reveal>
+
       {related.length > 0 ? (
         <section className="space-y-8">
           <Reveal>
             <SectionHeading>También te puede gustar</SectionHeading>
           </Reveal>
-          <Stagger className="grid grid-cols-2 gap-4 md:grid-cols-4">
-            {related.map((p) => (
-              <StaggerItem key={p.slug}>
-                <ProductCard product={p} />
-              </StaggerItem>
-            ))}
-          </Stagger>
+          <Reveal>
+            <Carousel>
+              {related.map((p) => (
+                <CarouselItem key={p.slug}>
+                  <ProductCard product={p} />
+                </CarouselItem>
+              ))}
+            </Carousel>
+          </Reveal>
         </section>
       ) : null}
     </main>

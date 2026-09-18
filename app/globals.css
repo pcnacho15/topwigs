@@ -166,12 +166,3 @@ h1, h2, h3, h4, h5 {
 @utility glow-violeta {
   box-shadow: var(--shadow-violeta);
 }
-
-/* Wordmark TOPWIGS (placeholder hasta tener la fuente graffiti real) */
-@utility wordmark {
-  font-family: var(--font-heading);
-  font-weight: 900;
-  font-style: italic;
-  letter-spacing: -0.03em;
-  text-transform: uppercase;
-}

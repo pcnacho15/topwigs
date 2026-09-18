@@ -77,7 +77,7 @@ export function Navbar({ links }: { links: NavLink[] }) {
           aria-label="TOPWIGS — inicio"
           className="shrink-0"
         >
-          <Logo size="sm" />
+          <Logo size="lg" />
         </Link>
 
         {/* Links (desktop) */}

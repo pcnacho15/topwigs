@@ -8,10 +8,12 @@ import {
   Tags,
   Package,
   ShoppingBag,
+  MessageSquare,
   ExternalLink,
   LogOut,
 } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
+import { Logo } from "@/components/ui/logo";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { cn } from "@/lib/utils";
 
@@ -21,6 +23,7 @@ const LINKS = [
   { href: "/admin/categorias", label: "Categorías", Icon: Tags },
   { href: "/admin/productos", label: "Productos", Icon: Package },
   { href: "/admin/pedidos", label: "Pedidos", Icon: ShoppingBag },
+  { href: "/admin/resenas", label: "Reseñas", Icon: MessageSquare },
 ];
 
 export function AdminSidebar({ userName }: { userName: string }) {
@@ -40,9 +43,7 @@ export function AdminSidebar({ userName }: { userName: string }) {
     <aside className="flex w-60 shrink-0 flex-col border-r border-linea bg-surface-1 p-4">
       <div className="mb-6 flex items-start justify-between px-2">
         <div>
-          <span className="wordmark text-xl text-neon">
-            TOP<span className="text-blanco">WIGS</span>
-          </span>
+          <Logo size="sm" />
           <p className="font-pixel text-[8px] uppercase tracking-widest text-humo">
             admin
           </p>

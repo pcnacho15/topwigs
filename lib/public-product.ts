@@ -58,6 +58,7 @@ export interface PublicProduct {
   agotado: boolean;
   colores: PublicColor[];
   features: string[];
+  tips: string[];
   imagenes: string[];
   videos: string[];
 }

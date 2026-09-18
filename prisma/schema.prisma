@@ -69,12 +69,38 @@ model Product {
   // Estructuras flexibles (se normalizan si hace falta filtrar):
   colores         Json     @default("[]") // {nombre,tipo:"solid"|"gradient",from,to}[]
   features        Json     @default("[]") // string[]
+  tips            Json     @default("[]") // string[] — tips de cuidado/uso que agrega el admin
   imagenes        Json     @default("[]") // string[] (URLs Cloudinary)
   videos          Json     @default("[]") // string[] (URLs Cloudinary)
+  reviewList      Review[]
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
   @@index([categoryId])
+}
+
+/**
+ * Reseña de un cliente sobre un producto. `rating`/`reviews` en `Product`
+ * son un caché calculado a partir de estas filas (ver
+ * `lib/reviews.ts#recomputeProductRating`), no se editan a mano.
+ *
+ * Un usuario tiene como máximo una reseña por producto: reenviar el
+ * formulario la reemplaza (upsert) en vez de duplicarla.
+ */
+model Review {
+  id         String   @id @default(cuid())
+  productId  String
+  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  rating     Int // 1–5
+  comentario String   @default("")
+  imagenes   Json     @default("[]") // string[] (URLs Cloudinary) — fotos del producto que sube el cliente
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([productId, userId])
+  @@index([productId])
 }
 
 model Order {
@@ -149,6 +175,7 @@ model User {
   sessions Session[]
   accounts Account[]
   orders   Order[]
+  reviews  Review[]
   /// Datos de facturación guardados por el cliente (opcional, uno por usuario).
   savedAddress SavedAddress?
 }

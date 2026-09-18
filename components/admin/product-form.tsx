@@ -58,8 +58,6 @@ const EMPTY: ProductInput = {
   categoryId: "",
   precioCop: 0,
   precioOfertaCop: null,
-  rating: 0,
-  reviews: 0,
   nuevo: false,
   stock: 0,
   activo: true,
@@ -67,6 +65,7 @@ const EMPTY: ProductInput = {
     { nombre: "", tipo: "solid", from: "#ff2f92", to: null, imagenes: [], videos: [] },
   ],
   features: [],
+  tips: [],
   imagenes: [],
   videos: [],
 };
@@ -324,6 +323,26 @@ export function ProductForm({ mode, id, categorias, initial }: Props) {
           />
         </Section>
 
+        {/* Tips: se muestran en el acordeón de la ficha del producto, junto
+            a la descripción y las características. */}
+        <Section title="Tips de cuidado">
+          <FormField
+            control={form.control}
+            name="tips"
+            render={({ field }) => (
+              <FormItem>
+                <FormControl>
+                  <StringListEditor
+                    value={field.value}
+                    onChange={field.onChange}
+                    placeholder="Lava con agua fría y shampoo especial"
+                  />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+        </Section>
+
         {/* Media */}
         <Section title="Imágenes">
           <FormField
@@ -410,46 +429,6 @@ export function ProductForm({ mode, id, categorias, initial }: Props) {
 
         {/* Métricas + flags */}
         <Section title="Detalles">
-          <div className="grid gap-4 sm:grid-cols-2">
-            <FormField
-              control={form.control}
-              name="rating"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Rating (0–5)</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      step="0.1"
-                      min={0}
-                      max={5}
-                      value={field.value}
-                      onChange={(e) => field.onChange(e.target.valueAsNumber || 0)}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="reviews"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Reseñas</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      min={0}
-                      value={field.value}
-                      onChange={(e) => field.onChange(e.target.valueAsNumber || 0)}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
           <FormField
             control={form.control}
             name="stock"

@@ -1,6 +1,7 @@
 import { Navbar } from "@/components/layout/navbar";
 // import { Footer } from "@/components/layout/footer";
 import { CartDrawer } from "@/components/cart/cart-drawer";
+import { WhatsAppButton } from "@/components/layout/whatsapp-button";
 import { getNavLinks } from "@/lib/queries/catalog";
 
 /** Layout de la tienda pública: navbar, footer y drawer del carrito. */
@@ -16,6 +17,7 @@ export default async function StoreLayout({
       <Navbar links={navLinks} />
       {children}
       <CartDrawer />
+      <WhatsAppButton />
     </>
   );
 }

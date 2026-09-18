@@ -18,8 +18,9 @@ export async function Footer() {
     <footer className="mt-auto border-t border-neon/30 bg-surface-1">
       <div className="mx-auto grid w-full max-w-6xl gap-8 px-4 py-12 sm:grid-cols-2 md:grid-cols-3">
         <div className="space-y-3">
-          <Logo />
-          <div className="flex items-center gap-3 text-neon mt-2">
+          <Logo size="lg" />
+          
+          <div className="flex items-center gap-3 text-neon">
             {socialLinks.map(({ key, href, label, Icon }) => (
               <a
                 key={key}

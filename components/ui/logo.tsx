@@ -1,18 +1,17 @@
+import Image from "next/image";
+import logo from "@/public/logos/logo.png";
 import { cn } from "@/lib/utils";
 
 type Size = "sm" | "md" | "lg" | "xl";
 
 const sizes: Record<Size, string> = {
-  sm: "text-xl",
-  md: "text-3xl",
-  lg: "text-5xl",
-  xl: "text-6xl sm:text-8xl",
+  sm: "h-6",
+  md: "h-10",
+  lg: "h-14",
+  xl: "h-20 sm:h-32",
 };
 
-/**
- * Wordmark "TOPWIGS". Placeholder tipográfico (.wordmark = Montserrat
- * black italic + glow) hasta integrar la fuente graffiti real de la marca.
- */
+/** Logo oficial de TOPWIGS (public/logos/logo.png). */
 export function Logo({
   size = "md",
   glow = true,
@@ -23,15 +22,15 @@ export function Logo({
   className?: string;
 }) {
   return (
-    <span
+    <Image
+      src={logo}
+      alt="TOPWIGS"
       className={cn(
-        "wordmark text-neon select-none",
-        glow && "text-glow",
+        "w-auto select-none",
+        glow && "drop-shadow-[0_0_10px_rgba(255,47,146,0.55)]",
         sizes[size],
         className,
       )}
-    >
-      TOP<span className="text-blanco">WIGS</span>
-    </span>
+    />
   );
 }

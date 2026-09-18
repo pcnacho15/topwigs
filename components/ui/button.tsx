@@ -35,7 +35,7 @@ export function Button({
   return (
     <button
       className={cn(
-        "inline-flex items-center justify-center gap-2 rounded-full uppercase tracking-wide",
+        "inline-flex items-center justify-center gap-2 rounded-md uppercase tracking-wide",
         "font-heading transition-all duration-200 cursor-pointer",
         "disabled:pointer-events-none disabled:opacity-50",
         variants[variant],
