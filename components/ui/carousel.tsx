@@ -58,7 +58,7 @@ export function Carousel({
         ref={ref}
         className={cn(
           "flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-smooth pb-2",
-          "[-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
+          "[-ms-overflow-style:none] scrollbar-none [&::-webkit-scrollbar]:hidden",
           className,
         )}
       >

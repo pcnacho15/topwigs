@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { Upload, X, Video } from "lucide-react";
+import { Upload, X, Video, ChevronLeft, ChevronRight } from "lucide-react";
 import { signCloudinaryUpload } from "@/app/admin/productos/actions";
 import { cn } from "@/lib/utils";
 
@@ -62,10 +62,19 @@ export function MediaUploader({
     setUploading(false);
   }
 
+  /** Intercambia el archivo en `index` con su vecino (-1 = izquierda, 1 = derecha). */
+  function move(index: number, dir: -1 | 1) {
+    const target = index + dir;
+    if (target < 0 || target >= value.length) return;
+    const next = [...value];
+    [next[index], next[target]] = [next[target], next[index]];
+    onChange(next);
+  }
+
   return (
     <div className="space-y-2">
       <div className="grid grid-cols-3 gap-3 sm:grid-cols-4">
-        {value.map((url) => (
+        {value.map((url, i) => (
           <div
             key={url}
             className="relative aspect-square overflow-hidden rounded-md border border-linea bg-surface-1"
@@ -83,6 +92,31 @@ export function MediaUploader({
             >
               <X className="size-3.5" />
             </button>
+            {i === 0 && resourceType === "image" ? (
+              <span className="absolute left-1 top-1 rounded-sm bg-black/80 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-white/80">
+                Portada
+              </span>
+            ) : null}
+            <div className="absolute inset-x-1 bottom-1 flex justify-between">
+              <button
+                type="button"
+                onClick={() => move(i, -1)}
+                disabled={i === 0}
+                aria-label="Mover a la izquierda"
+                className="grid size-6 place-items-center rounded-full bg-black/80 text-white/80 transition-colors hover:text-neon disabled:pointer-events-none disabled:opacity-0"
+              >
+                <ChevronLeft className="size-3.5" />
+              </button>
+              <button
+                type="button"
+                onClick={() => move(i, 1)}
+                disabled={i === value.length - 1}
+                aria-label="Mover a la derecha"
+                className="grid size-6 place-items-center rounded-full bg-black/80 text-white/80 transition-colors hover:text-neon disabled:pointer-events-none disabled:opacity-0"
+              >
+                <ChevronRight className="size-3.5" />
+              </button>
+            </div>
           </div>
         ))}
 

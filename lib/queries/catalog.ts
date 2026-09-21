@@ -143,6 +143,25 @@ export const getPublicProducts = cache(async (): Promise<PublicProduct[]> => {
   return rows.map(mapProduct);
 });
 
+/**
+ * "Lo más vendido" para el Home: no hay conteo de ventas real, así que se
+ * aproxima con productos que ya no son "nuevo" (llevan tiempo en catálogo)
+ * y tienen stock, ordenados por reseñas/rating como señal de popularidad.
+ * Mezcla catálogos (pelucas, lentes, etc.), a diferencia de los queries
+ * `...ByTipo` que sí filtran por uno solo.
+ */
+export const getBestSellers = cache(
+  async (limit = 12): Promise<PublicProduct[]> => {
+    const rows = await prisma.product.findMany({
+      where: { nuevo: false, activo: true, stock: { gt: 0 } },
+      orderBy: [{ reviews: "desc" }, { rating: "desc" }],
+      take: limit,
+      include: { category: { select: CATEGORIA_SELECT } },
+    });
+    return rows.map(mapProduct);
+  },
+);
+
 /** Productos de un catálogo, filtrados por el tipo de su categoría. */
 export const getPublicProductsByTipo = cache(
   async (tipoSlug: string): Promise<PublicProduct[]> => {

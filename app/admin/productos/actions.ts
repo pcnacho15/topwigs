@@ -4,7 +4,11 @@ import { revalidatePath } from "next/cache";
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { requireAdmin } from "@/lib/auth-guard";
-import { cloudinary, cloudinaryConfigured } from "@/lib/cloudinary";
+import {
+  cloudinary,
+  cloudinaryConfigured,
+  destroyCloudinaryAssets,
+} from "@/lib/cloudinary";
 import { productSchema } from "@/lib/schemas/product";
 
 export type ActionResult = { ok: true } | { ok: false; error: string };
@@ -66,6 +70,13 @@ export async function updateProducto(
   if (!parsed.success) {
     return { ok: false, error: parsed.error.issues[0]?.message ?? "Datos inválidos" };
   }
+  // Se guarda antes de sobrescribir: es lo único que permite saber después
+  // qué archivos dejaron de estar en el producto (y por lo tanto hay que
+  // borrar de Cloudinary, o quedan huérfanos ahí para siempre).
+  const previous = await prisma.product.findUnique({
+    where: { id },
+    select: { imagenes: true, videos: true },
+  });
   try {
     await prisma.product.update({
       where: { id },
@@ -77,13 +88,33 @@ export async function updateProducto(
     }
     throw e;
   }
+  if (previous) {
+    const prevImagenes = (previous.imagenes as unknown as string[]) ?? [];
+    const prevVideos = (previous.videos as unknown as string[]) ?? [];
+    const removidas = [
+      ...prevImagenes.filter((u) => !parsed.data.imagenes.includes(u)),
+      ...prevVideos.filter((u) => !parsed.data.videos.includes(u)),
+    ];
+    await destroyCloudinaryAssets(removidas);
+  }
   revalidate();
   return { ok: true };
 }
 
 export async function deleteProducto(id: string): Promise<ActionResult> {
   await requireAdmin();
+  const producto = await prisma.product.findUnique({
+    where: { id },
+    select: { imagenes: true, videos: true },
+  });
   await prisma.product.delete({ where: { id } });
+  if (producto) {
+    const urls = [
+      ...(((producto.imagenes as unknown as string[]) ?? [])),
+      ...(((producto.videos as unknown as string[]) ?? [])),
+    ];
+    await destroyCloudinaryAssets(urls);
+  }
   revalidate();
   return { ok: true };
 }

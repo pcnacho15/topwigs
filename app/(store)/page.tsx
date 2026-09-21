@@ -6,6 +6,8 @@ import { RetroWindow } from "@/components/ui/retro-window";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { CategoryCard } from "@/components/ui/category-card";
 import { LensCategoryCard } from "@/components/ui/lens-category-card";
+import { ProductCard } from "@/components/ui/product-card";
+import { Carousel, CarouselItem } from "@/components/ui/carousel";
 import { Hero } from "@/components/sections/hero";
 import { ContactForm } from "@/components/sections/contact-form";
 import { Reveal } from "@/components/motion/reveal";
@@ -25,6 +27,7 @@ import {
   getCatalogo,
   getFeaturedCategories,
   getPublicCategoriesByTipo,
+  getBestSellers,
 } from "@/lib/queries/catalog";
 import { Footer } from "@/components/layout/footer";
 
@@ -78,10 +81,11 @@ const TIPO_LENTES = "lentes";
 export default async function Home() {
   // Solo las categorías que el admin marcó como destacadas, de cualquier
   // catálogo. Cada tarjeta enlaza al catálogo de su propio tipo.
-  const [destacadas, lentes, categoriasLentes] = await Promise.all([
+  const [destacadas, lentes, categoriasLentes, masVendidos] = await Promise.all([
     getFeaturedCategories(),
     getCatalogo(TIPO_LENTES),
     getPublicCategoriesByTipo(TIPO_LENTES),
+    getBestSellers(),
   ]);
 
   return (
@@ -90,6 +94,38 @@ export default async function Home() {
       <Hero />
 
       <div className="flex flex-col items-center gap-20 px-4 py-16">
+        {/* ============ LO MÁS VENDIDO ============ */}
+        {/* No hay conteo de ventas real: se aproxima con productos que ya no
+            son "nuevo" (ver getBestSellers), para que la sección tenga
+            sentido de cara al cliente. */}
+        {masVendidos.length > 0 ? (
+          <Reveal className="w-full max-w-6xl">
+            <RetroWindow title="bestseller.exe">
+              <div className="space-y-8 p-5 sm:p-8">
+                <div className="flex flex-wrap items-center justify-center gap-3">
+                  <Badge tone="violeta" className="text-white">
+                    {/* <Fire className="size-3.5" /> */}
+                    💘 Top ventas
+                  </Badge>
+                  <SectionHeading centered={false}>Lo más vendido</SectionHeading>
+                </div>
+                <Carousel>
+                  {masVendidos.map((p) => (
+                    <CarouselItem key={p.slug}>
+                      <ProductCard product={p} />
+                    </CarouselItem>
+                  ))}
+                </Carousel>
+                <div className="flex justify-center">
+                  <Link href="/pelucas">
+                    <Button variant="outline">Ver todo</Button>
+                  </Link>
+                </div>
+              </div>
+            </RetroWindow>
+          </Reveal>
+        ) : null}
+
         {/* ============ CATEGORÍAS DESTACADAS ============ */}
         {destacadas.length > 0 ? (
           <section className="w-full max-w-6xl space-y-8">
