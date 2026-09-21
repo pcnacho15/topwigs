@@ -34,6 +34,7 @@ import { MediaUploader } from "@/components/admin/media-uploader";
 import { MediaPicker } from "@/components/admin/media-picker";
 import { StringListEditor } from "@/components/admin/string-list-editor";
 import { slugify } from "@/lib/utils";
+import { aplicarDescuentoPct } from "@/lib/public-product";
 
 /** Categoría del selector, con el catálogo al que pertenece. */
 export interface CategoriaOpcion {
@@ -86,6 +87,22 @@ export function ProductForm({ mode, id, categorias, initial }: Props) {
   const imagenes = form.watch("imagenes");
   const videos = form.watch("videos");
   const categoryId = form.watch("categoryId");
+  const precioCop = form.watch("precioCop");
+
+  // Campo auxiliar (no se guarda): solo sirve para calcular el precio de
+  // oferta redondeado a partir de un %. El precio de oferta sigue siendo
+  // editable a mano en su propio campo.
+  const [descuentoPctInput, setDescuentoPctInput] = useState("");
+
+  function aplicarDescuentoInput(value: string) {
+    setDescuentoPctInput(value);
+    const pct = Number(value);
+    if (value === "" || !Number.isFinite(pct) || pct <= 0 || pct >= 100) return;
+    form.setValue("precioOfertaCop", aplicarDescuentoPct(precioCop, pct), {
+      shouldDirty: true,
+      shouldValidate: true,
+    });
+  }
 
   /**
    * El tipo de producto no se guarda: lo hereda la categoría. Aquí solo sirve
@@ -302,6 +319,25 @@ export function ProductForm({ mode, id, categorias, initial }: Props) {
               )}
             />
           </div>
+          <FormItem>
+            <FormLabel>Calcular con % de descuento</FormLabel>
+            <FormControl>
+              <Input
+                type="number"
+                min={0}
+                max={99}
+                placeholder="Ej: 15"
+                value={descuentoPctInput}
+                onChange={(e) => aplicarDescuentoInput(e.target.value)}
+              />
+            </FormControl>
+            <FormDescription>
+              Escribe un % y calcula el precio de oferta de arriba,
+              redondeado al millar más cercano (135.000 con 15% → 115.000).
+              Es solo un ayudante: el precio de oferta se puede seguir
+              editando a mano.
+            </FormDescription>
+          </FormItem>
         </Section>
 
         {/* Features */}

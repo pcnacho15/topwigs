@@ -7,6 +7,7 @@ import type { PublicProduct } from "@/lib/public-product";
 import { colorToCss, descuentoPct } from "@/lib/public-product";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { DiscountRibbon } from "@/components/ui/discount-ribbon";
 import { PriceTag, formatCOP } from "@/components/ui/price";
 import { RatingStars } from "@/components/ui/rating-stars";
 import { HeartDrip, Minus, Plus } from "@/components/icons";
@@ -126,14 +127,7 @@ export function ProductDetail({
               {product.nuevo ? (
                 <Badge className="absolute left-4 top-4 z-10">Nuevo</Badge>
               ) : null}
-              {desc ? (
-                <Badge
-                  tone="violeta"
-                  className="absolute right-4 top-4 z-10"
-                >
-                  -{desc}%
-                </Badge>
-              ) : null}
+              {desc ? <DiscountRibbon pct={desc} /> : null}
             </>
           )}
           {activeMedia ? (

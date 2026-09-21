@@ -22,7 +22,7 @@ interface PriceTagProps {
 
 export function PriceTag({ value, showCurrency, className }: PriceTagProps) {
   return (
-    <span className={cn("font-heading font-bold text-blanco", className)}>
+    <span className={cn("text-blanco font-semibold", className)}>
       {formatCOP(value)}
       {/* {showCurrency && <span className="ml-1 text-humo">COP</span>} */}
     </span>

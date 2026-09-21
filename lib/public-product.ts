@@ -78,3 +78,13 @@ export function descuentoPct(
   if (!oferta || oferta >= precio) return null;
   return Math.round((1 - oferta / precio) * 100);
 }
+
+/**
+ * Precio de oferta a partir de un % de descuento sobre el precio base,
+ * redondeado al millar más cercano: 135000 con 15% da 115000, no el
+ * 114750 exacto (se ve más "redondo" en la tienda).
+ */
+export function aplicarDescuentoPct(precio: number, pct: number): number {
+  const exacto = precio * (1 - pct / 100);
+  return Math.round(exacto / 1000) * 1000;
+}

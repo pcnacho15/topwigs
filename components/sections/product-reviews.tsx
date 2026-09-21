@@ -37,26 +37,6 @@ export async function ProductReviews({
       </div>
 
       <div className="mx-auto max-w-2xl space-y-6">
-        <div className="rounded-goth border border-linea bg-surface-1 p-5">
-          {session ? (
-            <ReviewForm
-              productSlug={productSlug}
-              initial={
-                propia
-                  ? { rating: propia.rating, comentario: propia.comentario, imagenes: propia.imagenes }
-                  : null
-              }
-            />
-          ) : (
-            <p className="text-sm text-humo">
-              <Link href={`/login?next=/producto/${productSlug}`} className="text-neon hover:underline">
-                Inicia sesión
-              </Link>{" "}
-              para calificar y comentar este producto.
-            </p>
-          )}
-        </div>
-
         {ajenas.length > 0 ? (
           <ul className="space-y-4">
             {ajenas.map((r) => (
@@ -70,8 +50,13 @@ export async function ProductReviews({
                       <User className="size-4" />
                     </span>
                     <div>
-                      <p className="text-sm font-semibold text-blanco">{r.autor}</p>
-                      <RatingStars value={r.rating} className="mt-0.5" />
+                      <p className="text-sm font-semibold text-blanco">
+                        {r.autor}
+                      </p>
+                      <RatingStars
+                        value={r.rating}
+                        className="mt-0.5"
+                      />
                     </div>
                   </div>
                   <span className="text-xs text-humo">
@@ -83,7 +68,9 @@ export async function ProductReviews({
                   </span>
                 </div>
                 {r.comentario ? (
-                  <p className="mt-3 text-sm leading-relaxed text-humo">{r.comentario}</p>
+                  <p className="mt-3 text-sm leading-relaxed text-humo">
+                    {r.comentario}
+                  </p>
                 ) : null}
                 <ReviewImageGallery images={r.imagenes} />
               </li>
@@ -94,6 +81,32 @@ export async function ProductReviews({
             Sé el primero en dejar una reseña.
           </p>
         ) : null}
+        <div className="rounded-goth border border-linea bg-surface-1 p-5">
+          {session ? (
+            <ReviewForm
+              productSlug={productSlug}
+              initial={
+                propia
+                  ? {
+                      rating: propia.rating,
+                      comentario: propia.comentario,
+                      imagenes: propia.imagenes,
+                    }
+                  : null
+              }
+            />
+          ) : (
+            <p className="text-sm text-humo">
+              <Link
+                href={`/login?next=/producto/${productSlug}`}
+                className="text-neon hover:underline"
+              >
+                Inicia sesión
+              </Link>{" "}
+              para calificar y comentar este producto.
+            </p>
+          )}
+        </div>
       </div>
     </section>
   );

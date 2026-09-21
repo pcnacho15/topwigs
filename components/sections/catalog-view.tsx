@@ -72,7 +72,7 @@ export function CatalogView({
   };
 
   return (
-    <main className="mx-auto w-full max-w-6xl px-4 py-12">
+    <main className="mx-auto w-full max-w-6xl px-1 py-12">
       <Reveal className="mb-8 flex justify-center">
         <SectionHeading>{titulo}</SectionHeading>
       </Reveal>

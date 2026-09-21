@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { m, AnimatePresence } from "motion/react";
 import { Logo } from "@/components/ui/logo";
-import { Search, Cart } from "@/components/icons";
+import { Search, Cart, ShoppingBag } from "@/components/icons";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { UserMenu } from "@/components/layout/user-menu";
 import { AnnouncementBar } from "@/components/layout/announcement-bar";
@@ -117,9 +117,9 @@ export function Navbar({ links }: { links: NavLink[] }) {
             whileHover={{ scale: 1.12 }}
             whileTap={{ scale: 0.85 }}
           >
-            <Cart className="size-7 cursor-pointer" />
+            <ShoppingBag className="size-5 cursor-pointer" />
             {totalItems > 0 ? (
-              <span className="absolute -right-2 -top-2 grid size-4 place-items-center rounded-full bg-neon text-[9px] font-bold text-ink">
+              <span className="absolute -right-2 -top-2 grid size-4 rounded-full bg-neon text-[10px] font-semibold text-amber-50">
                 {totalItems > 9 ? "9+" : totalItems}
               </span>
             ) : null}
