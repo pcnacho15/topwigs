@@ -1,13 +1,13 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { PublicProduct, PublicCategory } from "@/lib/public-product";
 import { ProductCard } from "@/components/ui/product-card";
 import { RetroWindow } from "@/components/ui/retro-window";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { Reveal } from "@/components/motion/reveal";
 import { Stagger, StaggerItem } from "@/components/motion/stagger";
-import { Search, ChevronLeft, ChevronRight, HeartDrip } from "@/components/icons";
+import { Search, HeartDrip } from "@/components/icons";
 import { cn } from "@/lib/utils";
 
 const PAGE_SIZE = 8;
@@ -39,7 +39,8 @@ export function CatalogView({
 }) {
   const [categoria, setCategoria] = useState<string>(initialCategoria);
   const [query, setQuery] = useState("");
-  const [page, setPage] = useState(0);
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+  const sentinelRef = useRef<HTMLDivElement>(null);
 
   const tabs = useMemo(
     () => [
@@ -58,18 +59,45 @@ export function CatalogView({
     );
   }, [productos, categoria, query]);
 
-  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
-  const current = Math.min(page, totalPages - 1);
-  const visible = filtered.slice(current * PAGE_SIZE, current * PAGE_SIZE + PAGE_SIZE);
+  const visible = filtered.slice(0, visibleCount);
+  const hasMore = visibleCount < filtered.length;
+
+  // Lotes de PAGE_SIZE: el primero anima al montar, los siguientes al
+  // entrar en viewport (así la animación coincide con el scroll real,
+  // no con el momento en que el observer precarga el lote).
+  const batches = useMemo(() => {
+    const chunks: PublicProduct[][] = [];
+    for (let i = 0; i < visible.length; i += PAGE_SIZE) {
+      chunks.push(visible.slice(i, i + PAGE_SIZE));
+    }
+    return chunks;
+  }, [visible]);
 
   const selectCategoria = (s: string) => {
     setCategoria(s);
-    setPage(0);
+    setVisibleCount(PAGE_SIZE);
   };
   const onSearch = (v: string) => {
     setQuery(v);
-    setPage(0);
+    setVisibleCount(PAGE_SIZE);
   };
+
+  // Lazy load: al acercarse al final de la grilla, revela el siguiente lote.
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el || !hasMore) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setVisibleCount((c) => c + PAGE_SIZE);
+        }
+      },
+      { rootMargin: "400px" },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [hasMore]);
 
   return (
     <main className="mx-auto w-full max-w-6xl px-1 py-12">
@@ -120,16 +148,23 @@ export function CatalogView({
 
             {/* Grid / vacío */}
             {visible.length > 0 ? (
-              <Stagger
-                trigger="mount"
-                className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4"
-              >
-                {visible.map((p) => (
-                  <StaggerItem key={p.slug}>
-                    <ProductCard product={p} />
-                  </StaggerItem>
+              <>
+                {batches.map((batch, i) => (
+                  <Stagger
+                    key={i}
+                    trigger={i === 0 ? "mount" : "inView"}
+                    className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4"
+                  >
+                    {batch.map((p) => (
+                      <StaggerItem key={p.slug}>
+                        <ProductCard product={p} />
+                      </StaggerItem>
+                    ))}
+                  </Stagger>
                 ))}
-              </Stagger>
+                {/* Centinela: dispara la carga del siguiente lote al acercarse al final */}
+                {hasMore ? <div ref={sentinelRef} className="h-1 w-full" /> : null}
+              </>
             ) : (
               <div className="flex flex-col items-center gap-3 py-16 text-center">
                 <HeartDrip className="size-10 text-neon/50" />
@@ -142,42 +177,52 @@ export function CatalogView({
               </div>
             )}
 
-            {/* Paginación */}
-            {totalPages > 1 ? (
-              <div className="flex items-center justify-center gap-2 pt-2">
-                <button
-                  aria-label="Página anterior"
-                  disabled={current === 0}
-                  onClick={() => setPage(current - 1)}
-                  className="grid size-8 cursor-pointer place-items-center rounded-full border border-neon/40 text-humo transition-colors hover:text-neon disabled:cursor-default disabled:opacity-30"
-                >
-                  <ChevronLeft className="size-4" />
-                </button>
-                {Array.from({ length: totalPages }).map((_, i) => (
+            {/*
+              Paginación (deshabilitada a favor de lazy load con scroll infinito).
+              Se deja comentada por si se necesita reactivar más adelante.
+              Requiere: import { ChevronLeft, ChevronRight } from "@/components/icons";
+              y reemplazar `visibleCount`/`hasMore` por `page`/`totalPages`/`current`.
+
+              const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+              const current = Math.min(page, totalPages - 1);
+              const visible = filtered.slice(current * PAGE_SIZE, current * PAGE_SIZE + PAGE_SIZE);
+
+              {totalPages > 1 ? (
+                <div className="flex items-center justify-center gap-2 pt-2">
                   <button
-                    key={i}
-                    onClick={() => setPage(i)}
-                    aria-current={i === current}
-                    className={cn(
-                      "grid size-8 cursor-pointer place-items-center rounded-full font-heading text-sm transition-colors",
-                      i === current
-                        ? "bg-neon text-ink"
-                        : "border border-neon/40 text-humo hover:text-neon",
-                    )}
+                    aria-label="Página anterior"
+                    disabled={current === 0}
+                    onClick={() => setPage(current - 1)}
+                    className="grid size-8 cursor-pointer place-items-center rounded-full border border-neon/40 text-humo transition-colors hover:text-neon disabled:cursor-default disabled:opacity-30"
                   >
-                    {i + 1}
+                    <ChevronLeft className="size-4" />
                   </button>
-                ))}
-                <button
-                  aria-label="Página siguiente"
-                  disabled={current === totalPages - 1}
-                  onClick={() => setPage(current + 1)}
-                  className="grid size-8 cursor-pointer place-items-center rounded-full border border-neon/40 text-humo transition-colors hover:text-neon disabled:cursor-default disabled:opacity-30"
-                >
-                  <ChevronRight className="size-4" />
-                </button>
-              </div>
-            ) : null}
+                  {Array.from({ length: totalPages }).map((_, i) => (
+                    <button
+                      key={i}
+                      onClick={() => setPage(i)}
+                      aria-current={i === current}
+                      className={cn(
+                        "grid size-8 cursor-pointer place-items-center rounded-full font-heading text-sm transition-colors",
+                        i === current
+                          ? "bg-neon text-ink"
+                          : "border border-neon/40 text-humo hover:text-neon",
+                      )}
+                    >
+                      {i + 1}
+                    </button>
+                  ))}
+                  <button
+                    aria-label="Página siguiente"
+                    disabled={current === totalPages - 1}
+                    onClick={() => setPage(current + 1)}
+                    className="grid size-8 cursor-pointer place-items-center rounded-full border border-neon/40 text-humo transition-colors hover:text-neon disabled:cursor-default disabled:opacity-30"
+                  >
+                    <ChevronRight className="size-4" />
+                  </button>
+                </div>
+              ) : null}
+            */}
           </div>
         </RetroWindow>
       </Reveal>

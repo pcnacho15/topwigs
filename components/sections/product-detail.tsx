@@ -125,7 +125,8 @@ export function ProductDetail({
           ) : (
             <>
               {product.nuevo ? (
-                <Badge className="absolute left-4 top-4 z-10">Nuevo</Badge>
+                
+                <Badge tone="violeta" className="absolute text-white left-4 top-4 z-10">Nuevo</Badge>
               ) : null}
               {desc ? <DiscountRibbon pct={desc} /> : null}
             </>

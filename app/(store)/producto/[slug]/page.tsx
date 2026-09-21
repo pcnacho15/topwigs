@@ -56,7 +56,10 @@ export default async function ProductoPage({
         aria-label="Ruta de navegación"
         className="flex items-center gap-1.5 font-heading text-xs uppercase tracking-wide text-humo"
       >
-        <Link href="/" className="transition-colors hover:text-neon">
+        <Link
+          href="/"
+          className="transition-colors hover:text-neon"
+        >
           Inicio
         </Link>
         <ChevronRight className="size-3.5" />
@@ -73,7 +76,10 @@ export default async function ProductoPage({
       <Reveal>
         {/* La estimación se calcula aquí (servidor) y baja como texto: la
             página es force-dynamic, así que se recalcula en cada visita. */}
-        <ProductDetail product={product} envio={estimateDelivery()} />
+        <ProductDetail
+          product={product}
+          envio={estimateDelivery()}
+        />
       </Reveal>
 
       <Reveal>

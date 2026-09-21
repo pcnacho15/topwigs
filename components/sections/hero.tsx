@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { m, useReducedMotion, type Variants } from "motion/react";
-import wordmarkLg from "@/public/modelos/wordmarkxl.png";
+import wordmarkLg from "@/public/logos/logo.png";
 import { Star, Sparkle, Fire, Truck, Heart } from "@/components/icons";
 import { Bunny } from "@/components/ui/bunny";
 import { fadeUp } from "@/components/motion/variants";
@@ -146,9 +146,7 @@ export function Hero() {
             <Image
               src={wordmarkLg}
               alt="TOPWIGS"
-              priority
-              width={80}
-              height={120}
+              preload
               sizes="(max-width: 0px) 90vw, 560px"
               className="mx-auto h-auto w-full drop-shadow-[0_0_28px_rgba(255,47,146,0.5)] z-30"
             />
