@@ -9,6 +9,7 @@ import { LensCategoryCard } from "@/components/ui/lens-category-card";
 import { ProductCard } from "@/components/ui/product-card";
 import { Carousel, CarouselItem } from "@/components/ui/carousel";
 import { Hero } from "@/components/sections/hero";
+import { Testimonials } from "@/components/sections/testimonials";
 import { ContactForm } from "@/components/sections/contact-form";
 import { Reveal } from "@/components/motion/reveal";
 import { Stagger, StaggerItem } from "@/components/motion/stagger";
@@ -29,6 +30,7 @@ import {
   getPublicCategoriesByTipo,
   getBestSellers,
 } from "@/lib/queries/catalog";
+import { getTestimonials } from "@/lib/queries/testimonials";
 import { Footer } from "@/components/layout/footer";
 
 const FEATURES = [
@@ -81,12 +83,14 @@ const TIPO_LENTES = "lentes";
 export default async function Home() {
   // Solo las categorías que el admin marcó como destacadas, de cualquier
   // catálogo. Cada tarjeta enlaza al catálogo de su propio tipo.
-  const [destacadas, lentes, categoriasLentes, masVendidos] = await Promise.all([
-    getFeaturedCategories(),
-    getCatalogo(TIPO_LENTES),
-    getPublicCategoriesByTipo(TIPO_LENTES),
-    getBestSellers(),
-  ]);
+  const [destacadas, lentes, categoriasLentes, masVendidos, testimonios] =
+    await Promise.all([
+      getFeaturedCategories(),
+      getCatalogo(TIPO_LENTES),
+      getPublicCategoriesByTipo(TIPO_LENTES),
+      getBestSellers(),
+      getTestimonials(),
+    ]);
 
   return (
     <main className="flex flex-1 flex-col">
@@ -103,11 +107,16 @@ export default async function Home() {
             <RetroWindow title="bestseller.exe">
               <div className="space-y-8 p-5 sm:p-8">
                 <div className="flex flex-wrap items-center justify-center gap-3">
-                  <Badge tone="violeta" className="text-white">
+                  <Badge
+                    tone="violeta"
+                    className="text-white"
+                  >
                     {/* <Fire className="size-3.5" /> */}
                     💘 Top ventas
                   </Badge>
-                  <SectionHeading centered={false}>Lo más vendido</SectionHeading>
+                  <SectionHeading centered={false}>
+                    Lo más vendido
+                  </SectionHeading>
                 </div>
                 <Carousel>
                   {masVendidos.map((p) => (
@@ -118,32 +127,17 @@ export default async function Home() {
                 </Carousel>
                 <div className="flex justify-center">
                   <Link href="/pelucas">
-                    <Button variant="outline">Ver todo</Button>
+                    <Button
+                      variant="outline"
+                      className="rounded-full bg-neon hover:bg-neon/80 capitalize text-white"
+                    >
+                      Ver todo
+                    </Button>
                   </Link>
                 </div>
               </div>
             </RetroWindow>
           </Reveal>
-        ) : null}
-
-        {/* ============ CATEGORÍAS DESTACADAS ============ */}
-        {destacadas.length > 0 ? (
-          <section className="w-full max-w-6xl space-y-8">
-            <Reveal>
-              <SectionHeading>Categorías destacadas</SectionHeading>
-            </Reveal>
-            <Stagger className="grid grid-cols-2 gap-4 md:grid-cols-4">
-              {destacadas.map((c) => (
-                <StaggerItem key={c.slug}>
-                  <CategoryCard
-                    categoria={c}
-                    image={c.imagen ?? undefined}
-                    catalogo={catalogoHref(c.tipo.slug)}
-                  />
-                </StaggerItem>
-              ))}
-            </Stagger>
-          </section>
         ) : null}
 
         {/* ============ ¿POR QUÉ TOPWIGS? ============ */}
@@ -168,6 +162,29 @@ export default async function Home() {
             ))}
           </Stagger>
         </section>
+
+        {/* ============ CATEGORÍAS DESTACADAS ============ */}
+        {destacadas.length > 0 ? (
+          <section className="w-full max-w-6xl space-y-8">
+            <Reveal>
+              <SectionHeading>Categorías destacadas</SectionHeading>
+            </Reveal>
+            <Stagger className="grid grid-cols-2 gap-4 md:grid-cols-4">
+              {destacadas.map((c) => (
+                <StaggerItem key={c.slug}>
+                  <CategoryCard
+                    categoria={c}
+                    image={c.imagen ?? undefined}
+                    catalogo={catalogoHref(c.tipo.slug)}
+                  />
+                </StaggerItem>
+              ))}
+            </Stagger>
+          </section>
+        ) : null}
+
+        {/* ============ TESTIMONIOS ============ */}
+        <Testimonials testimonios={testimonios} />
 
         {/* ============ NUEVO: LENTES DE CONTACTO ============ */}
         {/* Solo las categorías (los colores), no los productos: la elección

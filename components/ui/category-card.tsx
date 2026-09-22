@@ -31,13 +31,13 @@ export function CategoryCard({
             />
           ) : null}
         </div>
-        {/* <div className="flex items-center justify-center gap-2 p-3">
-          <h3 className="font-heading text-lg font-bold uppercase tracking-wide">
-            {categoria.nombre}
-          </h3>
-          <Heart className="size-4 text-neon" />
-        </div> */}
       </Card>
+      <div className="flex items-center justify-center gap-2 py-2">
+        <h3 className="text-sm font-semibold capitalize tracking-wide">
+          {categoria.nombre}
+        </h3>
+        {/* <Heart className="size-4 text-neon" /> */}
+      </div>
     </Link>
   );
 }

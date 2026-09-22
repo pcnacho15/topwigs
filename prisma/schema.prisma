@@ -103,6 +103,24 @@ model Review {
   @@index([productId])
 }
 
+/**
+ * Testimonio de cliente que el admin escribe a mano para el Home — no está
+ * ligado a un `Review` real (esas son las reseñas que el cliente deja en la
+ * ficha de un producto). Es contenido de marketing, curado por el admin.
+ */
+model Testimonial {
+  id         String   @id @default(cuid())
+  nombre     String
+  ubicacion  String   @default("") // ciudad o "Cliente verificado", opcional
+  texto      String
+  rating     Int      @default(5) // 1–5
+  avatarUrl  String? // foto del cliente (Cloudinary), opcional
+  orden      Int      @default(0)
+  activo     Boolean  @default(true) // visible en el Home
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
 model Order {
   id                 String   @id @default(cuid())
   reference          String   @unique

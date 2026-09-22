@@ -9,6 +9,7 @@ import {
   Package,
   ShoppingBag,
   MessageSquare,
+  Quote,
   ExternalLink,
   LogOut,
 } from "lucide-react";
@@ -24,6 +25,7 @@ const LINKS = [
   { href: "/admin/productos", label: "Productos", Icon: Package },
   { href: "/admin/pedidos", label: "Pedidos", Icon: ShoppingBag },
   { href: "/admin/resenas", label: "Reseñas", Icon: MessageSquare },
+  { href: "/admin/testimonios", label: "Testimonios", Icon: Quote },
 ];
 
 export function AdminSidebar({ userName }: { userName: string }) {
