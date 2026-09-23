@@ -138,7 +138,7 @@ export function ProductDetail({
                 alt={product.nombre}
                 fill
                 sizes="(max-width: 1024px) 90vw, 45vw"
-                className="object-cover"
+                className="object-contain"
               />
             ) : (
               <video
@@ -147,7 +147,7 @@ export function ProductDetail({
                 // Igual que la <Image fill>: absoluto para que su resolución
                 // nativa no "empuje" el ancho del grid/flex y desborde la
                 // pantalla en mobile (min-width:auto por defecto en flex).
-                className="absolute inset-0 size-full object-cover"
+                className="absolute inset-0 size-full object-contain"
               />
             )
           ) : (

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { m, useReducedMotion, type Variants } from "motion/react";
-import wordmarkLg from "@/public/logos/logo.png";
+import wordmarkLg from "@/public/modelos/wordmarkxl.png";
 import { Star, Sparkle, Fire, Truck, Heart } from "@/components/icons";
 import { Bunny } from "@/components/ui/bunny";
 import { fadeUp } from "@/components/motion/variants";

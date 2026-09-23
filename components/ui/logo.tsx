@@ -1,5 +1,5 @@
 import Image from "next/image";
-import logo from "@/public/logos/logo.png";
+import logo from "@/public/modelos/wordmarkxl.png";
 import { cn } from "@/lib/utils";
 
 type Size = "sm" | "md" | "lg" | "xl";
@@ -11,7 +11,7 @@ const sizes: Record<Size, string> = {
   xl: "h-20 sm:h-32",
 };
 
-/** Logo oficial de TOPWIGS (public/logos/logo.png). */
+/** Logo oficial de TOPWIGS (public/modelos/wordmarkxl.png). */
 export function Logo({
   size = "md",
   glow = true,
