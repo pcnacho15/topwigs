@@ -14,18 +14,44 @@ import {
   TableCell,
 } from "@/components/shadcn/table";
 import { DeleteProductButton } from "@/components/admin/delete-product-button";
+import { ProductSearch } from "@/components/admin/product-search";
 
 export const metadata: Metadata = { title: "Productos" };
 
-export default async function ProductosPage() {
-  const productos = await prisma.product.findMany({
-    orderBy: { createdAt: "desc" },
-    include: {
-      category: {
-        select: { nombre: true, productType: { select: { label: true } } },
+const PAGE_SIZE = 20;
+
+export default async function ProductosPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string; page?: string }>;
+}) {
+  const { q: qParam, page: pageParam } = await searchParams;
+  const q = qParam?.trim() ?? "";
+  const page = Math.max(1, Number(pageParam) || 1);
+
+  const where = q ? { nombre: { contains: q, mode: "insensitive" as const } } : {};
+  const [productos, total] = await Promise.all([
+    prisma.product.findMany({
+      where,
+      orderBy: { createdAt: "desc" },
+      skip: (page - 1) * PAGE_SIZE,
+      take: PAGE_SIZE,
+      include: {
+        category: {
+          select: { nombre: true, productType: { select: { label: true } } },
+        },
       },
-    },
-  });
+    }),
+    prisma.product.count({ where }),
+  ]);
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+
+  const pageHref = (n: number) => {
+    const params = new URLSearchParams();
+    if (q) params.set("q", q);
+    params.set("page", String(n));
+    return `/admin/productos?${params}`;
+  };
 
   return (
     <div className="space-y-6">
@@ -40,6 +66,8 @@ export default async function ProductosPage() {
           </Link>
         </Button>
       </div>
+
+      <ProductSearch initialQuery={q} />
 
       <Card>
         <CardContent className="p-0">
@@ -116,11 +144,37 @@ export default async function ProductosPage() {
           </Table>
           {productos.length === 0 ? (
             <p className="py-10 text-center text-sm text-humo">
-              No hay productos todavía.
+              {q ? `No se encontraron productos para "${q}".` : "No hay productos todavía."}
             </p>
           ) : null}
         </CardContent>
       </Card>
+
+      {totalPages > 1 ? (
+        <div className="flex items-center justify-center gap-3">
+          {page > 1 ? (
+            <Button asChild variant="outline">
+              <Link href={pageHref(page - 1)}>Anterior</Link>
+            </Button>
+          ) : (
+            <Button variant="outline" disabled>
+              Anterior
+            </Button>
+          )}
+          <span className="text-sm text-humo">
+            Página {page} de {totalPages}
+          </span>
+          {page < totalPages ? (
+            <Button asChild variant="outline">
+              <Link href={pageHref(page + 1)}>Siguiente</Link>
+            </Button>
+          ) : (
+            <Button variant="outline" disabled>
+              Siguiente
+            </Button>
+          )}
+        </div>
+      ) : null}
     </div>
   );
 }
