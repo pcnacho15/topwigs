@@ -38,6 +38,7 @@ export const productSchema = z
     precioCop: z.number().int().min(0, "Precio inválido"),
     precioOfertaCop: z.number().int().min(0).nullable(),
     nuevo: z.boolean(),
+    masVendido: z.boolean(),
     stock: z.number().int().min(0, "No puede ser negativo"),
     activo: z.boolean(),
     colores: z.array(colorSpecSchema).min(1, "Agrega al menos un color"),

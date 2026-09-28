@@ -51,6 +51,7 @@ export default async function EditarProductoPage({
     precioCop: producto.precioCop,
     precioOfertaCop: producto.precioOfertaCop,
     nuevo: producto.nuevo,
+    masVendido: producto.masVendido,
     stock: producto.stock,
     activo: producto.activo,
     colores,

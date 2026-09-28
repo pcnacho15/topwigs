@@ -38,6 +38,9 @@ model Category {
   orden         Int         @default(0)
   activa        Boolean     @default(true)
   destacada     Boolean     @default(false) // el admin la elige para "Categorías destacadas" del Home
+  // Ficha informativa para clientes ("¿Qué es un Lace Front 13x4?"):
+  resumen         String      @default("") // 1–2 líneas para catálogo y cabecera del modal
+  caracteristicas Json        @default("[]") // {titulo, imagen, pieImagen, puntos: string[]}[]
   productTypeId String
   productType   ProductType @relation(fields: [productTypeId], references: [id])
   products      Product[]
@@ -64,6 +67,7 @@ model Product {
   rating          Float    @default(0)
   reviews         Int      @default(0)
   nuevo           Boolean  @default(false)
+  masVendido      Boolean  @default(false) // aparece en "Lo más vendido" del Home (lo decide el admin)
   stock           Int      @default(0) // unidades disponibles
   activo          Boolean  @default(true) // disponible para la venta (si es false o stock=0, se muestra "agotado" pero sigue visible)
   // Estructuras flexibles (se normalizan si hace falta filtrar):

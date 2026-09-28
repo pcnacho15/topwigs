@@ -31,6 +31,7 @@ function toData(d: import("@/lib/schemas/product").ProductInput) {
     precioOfertaCop: d.precioOfertaCop,
     categoryId: d.categoryId,
     nuevo: d.nuevo,
+    masVendido: d.masVendido,
     stock: d.stock,
     activo: d.activo,
     colores: json(d.colores),
@@ -115,6 +116,30 @@ export async function deleteProducto(id: string): Promise<ActionResult> {
     ];
     await destroyCloudinaryAssets(urls);
   }
+  revalidate();
+  return { ok: true };
+}
+
+/** Agrega o quita el producto de "Lo más vendido" desde la lista del admin. */
+export async function setMasVendido(
+  id: string,
+  masVendido: boolean,
+): Promise<ActionResult> {
+  await requireAdmin();
+  const producto = await prisma.product.findUnique({
+    where: { id },
+    select: { activo: true, stock: true },
+  });
+  if (!producto) {
+    return { ok: false, error: "El producto ya no existe." };
+  }
+  if (masVendido && (!producto.activo || producto.stock <= 0)) {
+    return {
+      ok: false,
+      error: "Solo se pueden marcar productos disponibles y con inventario.",
+    };
+  }
+  await prisma.product.update({ where: { id }, data: { masVendido } });
   revalidate();
   return { ok: true };
 }

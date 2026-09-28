@@ -99,9 +99,8 @@ export default async function Home() {
 
       <div className="flex flex-col items-center gap-20 px-4 py-16">
         {/* ============ LO MÁS VENDIDO ============ */}
-        {/* No hay conteo de ventas real: se aproxima con productos que ya no
-            son "nuevo" (ver getBestSellers), para que la sección tenga
-            sentido de cara al cliente. */}
+        {/* Productos marcados como "más vendido" desde el admin
+            (ver getBestSellers). */}
         {masVendidos.length > 0 ? (
           <Reveal className="w-full max-w-6xl">
             <RetroWindow title="bestseller.exe">

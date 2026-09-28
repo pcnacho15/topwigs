@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { CategoryForm } from "@/components/admin/category-form";
+import type { Caracteristica } from "@/lib/schemas/category";
 
 export const metadata: Metadata = { title: "Editar categoría" };
 
@@ -37,6 +38,8 @@ export default async function EditarCategoriaPage({
           orden: categoria.orden,
           activa: categoria.activa,
           destacada: categoria.destacada,
+          resumen: categoria.resumen,
+          caracteristicas: categoria.caracteristicas as unknown as Caracteristica[],
         }}
       />
     </div>

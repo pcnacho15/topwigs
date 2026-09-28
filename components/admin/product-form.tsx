@@ -60,6 +60,7 @@ const EMPTY: ProductInput = {
   precioCop: 0,
   precioOfertaCop: null,
   nuevo: false,
+  masVendido: false,
   stock: 0,
   activo: true,
   colores: [
@@ -512,11 +513,25 @@ export function ProductForm({ mode, id, categorias, initial }: Props) {
                 </FormItem>
               )}
             />
+            <FormField
+              control={form.control}
+              name="masVendido"
+              render={({ field }) => (
+                <FormItem className="flex items-center justify-between rounded-md border border-linea p-3">
+                  <FormLabel>Mostrar en &quot;Lo más vendido&quot;</FormLabel>
+                  <FormControl>
+                    <Switch checked={field.value} onCheckedChange={field.onChange} />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
           </div>
           <p className="text-xs text-humo/70">
             Si lo desactivas, el producto sigue apareciendo en la tienda pero
             se muestra como &quot;Agotado&quot;, igual que cuando el
-            inventario llega a 0.
+            inventario llega a 0. &quot;Lo más vendido&quot; solo muestra los
+            productos marcados que estén disponibles y con inventario (máximo
+            10, primero los de más reseñas y mejor calificación).
           </p>
         </Section>
 

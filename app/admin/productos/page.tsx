@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Plus, Pencil } from "lucide-react";
+import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { formatCOP } from "@/components/ui/price";
 import { Button } from "@/components/shadcn/button";
@@ -14,23 +15,59 @@ import {
   TableCell,
 } from "@/components/shadcn/table";
 import { DeleteProductButton } from "@/components/admin/delete-product-button";
-import { ProductSearch } from "@/components/admin/product-search";
+import { ProductFiltersBar } from "@/components/admin/product-filters";
+import { BestSellerToggle } from "@/components/admin/best-seller-toggle";
+import {
+  parseProductFilters,
+  hasActiveFilters,
+  productFiltersHref,
+  type ProductFilters,
+} from "@/lib/admin-product-filters";
 
 export const metadata: Metadata = { title: "Productos" };
 
 const PAGE_SIZE = 20;
 
+// Puede comprarse, y por lo tanto salir en "Lo más vendido".
+const DISPONIBLE: Prisma.ProductWhereInput = { activo: true, stock: { gt: 0 } };
+const AGOTADO: Prisma.ProductWhereInput = { OR: [{ activo: false }, { stock: { lte: 0 } }] };
+
+function buildWhere(f: ProductFilters): Prisma.ProductWhereInput {
+  const and: Prisma.ProductWhereInput[] = [];
+  if (f.q) and.push({ nombre: { contains: f.q, mode: "insensitive" } });
+  if (f.tipo) and.push({ category: { productTypeId: f.tipo } });
+  if (f.categoria) and.push({ categoryId: f.categoria });
+  if (f.min || f.max) {
+    // Precio efectivo: el de oferta si lo tiene, si no el normal.
+    const range = {
+      ...(f.min ? { gte: Number(f.min) } : {}),
+      ...(f.max ? { lte: Number(f.max) } : {}),
+    };
+    and.push({
+      OR: [{ precioOfertaCop: range }, { precioOfertaCop: null, precioCop: range }],
+    });
+  }
+  if (f.stock === "con") and.push({ stock: { gt: 0 } });
+  if (f.stock === "sin") and.push({ stock: { lte: 0 } });
+  if (f.estado === "disponible") and.push(DISPONIBLE);
+  if (f.estado === "agotado") and.push(AGOTADO);
+  if (f.nuevo) and.push({ nuevo: f.nuevo === "si" });
+  if (f.vendido === "si") and.push({ masVendido: true, ...DISPONIBLE });
+  if (f.vendido === "no") and.push({ OR: [{ masVendido: false }, AGOTADO] });
+  return and.length ? { AND: and } : {};
+}
+
 export default async function ProductosPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; page?: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const { q: qParam, page: pageParam } = await searchParams;
-  const q = qParam?.trim() ?? "";
-  const page = Math.max(1, Number(pageParam) || 1);
+  const sp = await searchParams;
+  const filters = parseProductFilters(sp);
+  const page = Math.max(1, Number(sp.page) || 1);
 
-  const where = q ? { nombre: { contains: q, mode: "insensitive" as const } } : {};
-  const [productos, total] = await Promise.all([
+  const where = buildWhere(filters);
+  const [productos, total, tipos, categorias] = await Promise.all([
     prisma.product.findMany({
       where,
       orderBy: { createdAt: "desc" },
@@ -43,15 +80,18 @@ export default async function ProductosPage({
       },
     }),
     prisma.product.count({ where }),
+    prisma.productType.findMany({
+      orderBy: [{ orden: "asc" }, { label: "asc" }],
+      select: { id: true, label: true },
+    }),
+    prisma.category.findMany({
+      orderBy: [{ orden: "asc" }, { nombre: "asc" }],
+      select: { id: true, nombre: true, productTypeId: true },
+    }),
   ]);
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
-  const pageHref = (n: number) => {
-    const params = new URLSearchParams();
-    if (q) params.set("q", q);
-    params.set("page", String(n));
-    return `/admin/productos?${params}`;
-  };
+  const pageHref = (n: number) => productFiltersHref(filters, n);
 
   return (
     <div className="space-y-6">
@@ -67,7 +107,16 @@ export default async function ProductosPage({
         </Button>
       </div>
 
-      <ProductSearch initialQuery={q} />
+      <ProductFiltersBar
+        initial={filters}
+        tipos={tipos}
+        categorias={categorias.map((c) => ({
+          id: c.id,
+          nombre: c.nombre,
+          tipoId: c.productTypeId,
+        }))}
+        total={total}
+      />
 
       <Card>
         <CardContent className="p-0">
@@ -91,6 +140,11 @@ export default async function ProductosPage({
                     {p.nuevo ? (
                       <span className="ml-2 rounded-full bg-neon px-2 py-0.5 text-[9px] font-bold uppercase text-ink">
                         Nuevo
+                      </span>
+                    ) : null}
+                    {p.masVendido && p.activo && p.stock > 0 ? (
+                      <span className="ml-2 rounded-full border border-neon px-2 py-0.5 text-[9px] font-bold uppercase text-neon">
+                        Más vendido
                       </span>
                     ) : null}
                   </TableCell>
@@ -122,6 +176,18 @@ export default async function ProductosPage({
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center justify-end gap-1">
+                      {/* Solo los que pueden salir en "Lo más vendido"
+                          (disponibles y con stock); el hueco mantiene
+                          alineados los demás botones. */}
+                      {p.activo && p.stock > 0 ? (
+                        <BestSellerToggle
+                          id={p.id}
+                          nombre={p.nombre}
+                          masVendido={p.masVendido}
+                        />
+                      ) : (
+                        <span className="size-10" aria-hidden />
+                      )}
                       <Button
                         asChild
                         variant="ghost"
@@ -144,7 +210,9 @@ export default async function ProductosPage({
           </Table>
           {productos.length === 0 ? (
             <p className="py-10 text-center text-sm text-humo">
-              {q ? `No se encontraron productos para "${q}".` : "No hay productos todavía."}
+              {hasActiveFilters(filters)
+                ? "No hay productos que coincidan con los filtros."
+                : "No hay productos todavía."}
             </p>
           ) : null}
         </CardContent>

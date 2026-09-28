@@ -5,7 +5,7 @@ import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { requireAdmin } from "@/lib/auth-guard";
 import { cloudinary, cloudinaryConfigured } from "@/lib/cloudinary";
-import { categorySchema } from "@/lib/schemas/category";
+import { categorySchema, type CategoryInput } from "@/lib/schemas/category";
 
 export type ActionResult = { ok: true } | { ok: false; error: string };
 
@@ -17,6 +17,17 @@ function revalidate() {
   revalidatePath("/"); // tarjetas de categoría del Home
 }
 
+function toData(d: CategoryInput) {
+  return {
+    ...d,
+    // El pie solo tiene sentido si hay foto.
+    caracteristicas: d.caracteristicas.map((c) => ({
+      ...c,
+      pieImagen: c.imagen ? c.pieImagen : "",
+    })) as unknown as Prisma.InputJsonValue,
+  };
+}
+
 export async function createCategoria(input: unknown): Promise<ActionResult> {
   await requireAdmin();
   const parsed = categorySchema.safeParse(input);
@@ -24,7 +35,7 @@ export async function createCategoria(input: unknown): Promise<ActionResult> {
     return { ok: false, error: parsed.error.issues[0]?.message ?? "Datos inválidos" };
   }
   try {
-    await prisma.category.create({ data: parsed.data });
+    await prisma.category.create({ data: toData(parsed.data) });
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2002") {
       return {
@@ -48,7 +59,7 @@ export async function updateCategoria(
     return { ok: false, error: parsed.error.issues[0]?.message ?? "Datos inválidos" };
   }
   try {
-    await prisma.category.update({ where: { id }, data: parsed.data });
+    await prisma.category.update({ where: { id }, data: toData(parsed.data) });
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2002") {
       return {

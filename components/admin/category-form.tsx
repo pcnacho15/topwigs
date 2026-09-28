@@ -7,6 +7,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { categorySchema, type CategoryInput } from "@/lib/schemas/category";
 import { createCategoria, updateCategoria } from "@/app/admin/categorias/actions";
 import { CategoryImageUploader } from "@/components/admin/category-image-uploader";
+import { CaracteristicasEditor } from "@/components/admin/caracteristicas-editor";
+import { Textarea } from "@/components/shadcn/textarea";
 import {
   Form,
   FormField,
@@ -59,6 +61,8 @@ export function CategoryForm({
         orden: 0,
         activa: true,
         destacada: false,
+        resumen: "",
+        caracteristicas: [],
       },
   });
 
@@ -78,7 +82,7 @@ export function CategoryForm({
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="max-w-lg space-y-6">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="max-w-2xl space-y-6">
         <FormField
           control={form.control}
           name="productTypeId"
@@ -224,6 +228,47 @@ export function CategoryForm({
             </FormItem>
           )}
         />
+
+        <section className="space-y-4 border-t border-linea pt-6">
+          <div className="space-y-1">
+            <h2 className="font-heading text-sm font-bold uppercase tracking-wide text-neon">
+              Información para clientes
+            </h2>
+            <p className="text-xs text-humo">
+              Explica en qué consiste esta categoría (p. ej. qué es un Lace
+              Front 13x4). Si no agregas características, la ficha no se
+              muestra en la tienda.
+            </p>
+          </div>
+
+          <FormField
+            control={form.control}
+            name="resumen"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Resumen</FormLabel>
+                <FormControl>
+                  <Textarea
+                    {...field}
+                    rows={2}
+                    maxLength={200}
+                    placeholder="Encaje frontal amplio que permite peinar la raya libremente y logra una línea de nacimiento natural."
+                  />
+                </FormControl>
+                <FormDescription>
+                  1–2 líneas. Se muestra en el catálogo y al inicio de la ficha
+                  ({field.value.length}/200).
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <div className="space-y-2">
+            <p className="text-sm font-medium">Características</p>
+            <CaracteristicasEditor control={form.control} />
+          </div>
+        </section>
 
         {error ? <p className="text-sm text-red-500">{error}</p> : null}
 
