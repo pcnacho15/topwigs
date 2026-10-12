@@ -175,6 +175,7 @@ export default async function Home() {
                     categoria={c}
                     image={c.imagen ?? undefined}
                     catalogo={catalogoHref(c.tipo.slug)}
+                    ficha={c}
                   />
                 </StaggerItem>
               ))}

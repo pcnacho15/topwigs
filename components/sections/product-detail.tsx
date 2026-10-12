@@ -3,7 +3,10 @@
 import { useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import type { PublicProduct } from "@/lib/public-product";
+import type {
+  PublicCategoriaFicha,
+  PublicProduct,
+} from "@/lib/public-product";
 import { colorToCss, descuentoPct } from "@/lib/public-product";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -13,6 +16,7 @@ import { RatingStars } from "@/components/ui/rating-stars";
 import { HeartDrip, Minus, Plus } from "@/components/icons";
 import { useCart } from "@/components/cart/cart-context";
 import { ShippingEstimate } from "@/components/ui/shipping-estimate";
+import { CategoryInfo } from "@/components/ui/category-info";
 import type { DeliveryEstimate } from "@/lib/delivery";
 import { cn } from "@/lib/utils";
 import { ProductInfoAccordion } from "./product-info-accordion";
@@ -22,9 +26,12 @@ type Media = { type: "image" | "video"; url: string };
 export function ProductDetail({
   product,
   envio,
+  fichaCategoria,
 }: {
   product: PublicProduct;
   envio: DeliveryEstimate;
+  /** Ficha de la categoría del producto; `null` si no tiene características. */
+  fichaCategoria: PublicCategoriaFicha | null;
 }) {
   const { add, open } = useCart();
   const router = useRouter();
@@ -222,6 +229,13 @@ export function ProductDetail({
             <p className="font-heading text-sm font-bold uppercase tracking-wide text-humo">
               Producto agotado
             </p>
+          ) : null}
+          {fichaCategoria ? (
+            <CategoryInfo
+              ficha={fichaCategoria}
+              variant="link"
+              label={`¿Qué es ${fichaCategoria.nombre}?`}
+            />
           ) : null}
         </div>
 

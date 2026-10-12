@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
+  getCategoriaFicha,
   getPublicProductBySlug,
   getPublicProductsByTipo,
 } from "@/lib/queries/catalog";
@@ -41,7 +42,10 @@ export default async function ProductoPage({
   const catalogo = product.tipo;
 
   // Relacionados dentro del mismo catálogo (no mezclar tipos de producto).
-  const all = await getPublicProductsByTipo(catalogo.slug);
+  const [all, fichaCategoria] = await Promise.all([
+    getPublicProductsByTipo(catalogo.slug),
+    getCategoriaFicha(catalogo.slug, product.categoria.slug),
+  ]);
   const related = [
     ...all.filter(
       (p) =>
@@ -79,6 +83,7 @@ export default async function ProductoPage({
         <ProductDetail
           product={product}
           envio={estimateDelivery()}
+          fichaCategoria={fichaCategoria}
         />
       </Reveal>
 

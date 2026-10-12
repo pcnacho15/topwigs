@@ -6,6 +6,8 @@ import type {
   PublicProduct,
   PublicCategory,
   PublicCategoryConTipo,
+  PublicCaracteristica,
+  PublicCategoriaFicha,
   PublicColor,
   PublicProductType,
 } from "@/lib/public-product";
@@ -29,9 +31,41 @@ type ProductWithCategory = Product & {
   category: { slug: string; nombre: string; productType: PublicProductType };
 };
 
-type CategoryRow = Pick<Category, "id" | "slug" | "nombre" | "imagen"> & {
-  productType: PublicProductType;
-};
+type CategoryRow = Pick<
+  Category,
+  "id" | "slug" | "nombre" | "imagen" | "resumen" | "caracteristicas"
+>;
+
+/** Campos de categoría que necesita la tienda, incluida su ficha. */
+const CATEGORIA_PUBLICA_SELECT = {
+  id: true,
+  slug: true,
+  nombre: true,
+  imagen: true,
+  resumen: true,
+  caracteristicas: true,
+} as const;
+
+/**
+ * La ficha se guarda como JSON: se descartan entradas mal formadas para que
+ * un dato raro en la BD no rompa el modal de la tienda.
+ */
+function parseCaracteristicas(raw: unknown): PublicCaracteristica[] {
+  if (!Array.isArray(raw)) return [];
+  return raw.flatMap((c): PublicCaracteristica[] => {
+    if (!c || typeof c !== "object" || typeof c.titulo !== "string") return [];
+    return [
+      {
+        titulo: c.titulo,
+        imagen: typeof c.imagen === "string" && c.imagen ? c.imagen : null,
+        pieImagen: typeof c.pieImagen === "string" ? c.pieImagen : "",
+        puntos: Array.isArray(c.puntos)
+          ? c.puntos.filter((p: unknown): p is string => typeof p === "string")
+          : [],
+      },
+    ];
+  });
+}
 
 /**
  * Los colores guardados antes de que existiera la asignación de medios por
@@ -78,14 +112,21 @@ function mapProduct(p: ProductWithCategory): PublicProduct {
   };
 }
 
-function mapCategoria(c: CategoryRow): PublicCategoryConTipo {
+function mapCategoria(c: CategoryRow): PublicCategory {
   return {
     id: c.id,
     slug: c.slug,
     nombre: c.nombre,
     imagen: c.imagen,
-    tipo: c.productType,
+    resumen: c.resumen,
+    caracteristicas: parseCaracteristicas(c.caracteristicas),
   };
+}
+
+function mapCategoriaConTipo(
+  c: CategoryRow & { productType: PublicProductType },
+): PublicCategoryConTipo {
+  return { ...mapCategoria(c), tipo: c.productType };
 }
 
 // ─────────────── Catálogos (tipos de producto) ───────────────
@@ -198,14 +239,11 @@ export const getPublicCategories = cache(
       where: { activa: true },
       orderBy: [{ productType: { orden: "asc" } }, { orden: "asc" }],
       select: {
-        id: true,
-        slug: true,
-        nombre: true,
-        imagen: true,
+        ...CATEGORIA_PUBLICA_SELECT,
         productType: { select: TIPO_SELECT },
       },
     });
-    return rows.map(mapCategoria);
+    return rows.map(mapCategoriaConTipo);
   },
 );
 
@@ -223,9 +261,9 @@ export const getPublicCategoriesByTipo = cache(
         products: { some: {} },
       },
       orderBy: { orden: "asc" },
-      select: { id: true, slug: true, nombre: true, imagen: true },
+      select: CATEGORIA_PUBLICA_SELECT,
     });
-    return rows;
+    return rows.map(mapCategoria);
   },
 );
 
@@ -246,13 +284,31 @@ export const getFeaturedCategories = cache(
       },
       orderBy: [{ productType: { orden: "asc" } }, { orden: "asc" }],
       select: {
-        id: true,
-        slug: true,
-        nombre: true,
-        imagen: true,
+        ...CATEGORIA_PUBLICA_SELECT,
         productType: { select: TIPO_SELECT },
       },
     });
-    return rows.map(mapCategoria);
+    return rows.map(mapCategoriaConTipo);
+  },
+);
+
+/**
+ * Ficha informativa de una categoría (para la ficha de producto). El slug
+ * solo es único dentro de su catálogo, por eso se busca junto con el tipo.
+ * `null` si la categoría no tiene características que mostrar.
+ */
+export const getCategoriaFicha = cache(
+  async (
+    tipoSlug: string,
+    categoriaSlug: string,
+  ): Promise<PublicCategoriaFicha | null> => {
+    const row = await prisma.category.findFirst({
+      where: { slug: categoriaSlug, productType: { slug: tipoSlug } },
+      select: { nombre: true, resumen: true, caracteristicas: true },
+    });
+    if (!row) return null;
+    const caracteristicas = parseCaracteristicas(row.caracteristicas);
+    if (caracteristicas.length === 0) return null;
+    return { nombre: row.nombre, resumen: row.resumen, caracteristicas };
   },
 );

@@ -5,6 +5,7 @@ import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { getSession } from "@/lib/auth-guard";
 import { shippingCostFor } from "@/lib/shipping";
+import { ubicacionValida } from "@/data/colombia";
 // import { ivaCopFor } from "@/lib/iva"; 
 
 interface CheckoutItem {
@@ -25,7 +26,7 @@ interface Customer {
 
 type Result =
   | { ok: true; url: string; reference: string }
-  | { ok: false; error: "missing_keys" | "empty" };
+  | { ok: false; error: "missing_keys" | "empty" | "invalid_location" };
 
 const json = (v: unknown) => v as Prisma.InputJsonValue;
 
@@ -46,6 +47,14 @@ export async function createWompiCheckout(input: {
 
   if (!publicKey || !integrity) {
     return { ok: false, error: "missing_keys" };
+  }
+
+  // Departamento y municipio vienen de selects: si no están en la lista
+  // oficial, el formulario fue manipulado y el flete no se puede calcular.
+  if (
+    !ubicacionValida(input.customer.departamento, input.customer.municipio)
+  ) {
+    return { ok: false, error: "invalid_location" };
   }
 
   // Precios autoritativos desde la DB.
@@ -89,9 +98,12 @@ export async function createWompiCheckout(input: {
   }
   if (subtotalCop <= 0) return { ok: false, error: "empty" };
 
-  // Flete plano (Interrápidísimo) — mismo costo a todo el país, o gratis
-  // si el subtotal (ya recalculado con precios de la BD) llega al umbral.
-  const shippingCop = shippingCostFor(subtotalCop);
+  // Flete según departamento (Antioquia tiene tarifa propia), o gratis si
+  // el subtotal (ya recalculado con precios de la BD) llega al umbral.
+  const shippingCop = shippingCostFor(
+    subtotalCop,
+    input.customer.departamento,
+  );
   // const ivaCop = ivaCopFor(subtotalCop + shippingCop);
   const totalCop = subtotalCop + shippingCop /*+ ivaCop*/;
 

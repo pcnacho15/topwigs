@@ -5,7 +5,12 @@ import Link from "next/link";
 import { useCart } from "@/components/cart/cart-context";
 import { formatCOP } from "@/components/ui/price";
 import { Button } from "@/components/ui/button";
-import { Input, FieldLabel, Textarea } from "@/components/ui/input";
+import { Input, FieldLabel, Select, Textarea } from "@/components/ui/input";
+import {
+  DEPARTAMENTOS,
+  municipiosDe,
+  normalizarUbicacion,
+} from "@/data/colombia";
 import { Checkbox } from "@/components/ui/checkbox";
 import { RetroWindow } from "@/components/ui/retro-window";
 import { SectionHeading } from "@/components/ui/section-heading";
@@ -38,13 +43,13 @@ import Image from "next/image";
 /** De dónde salieron los datos con los que se precargó el formulario. */
 type Origen = "cuenta" | "navegador" | null;
 
+/** Ajusta departamento/municipio guardados a las opciones de los selects. */
+function conUbicacionOficial(info: CustomerInfo): CustomerInfo {
+  return { ...info, ...normalizarUbicacion(info.departamento, info.municipio) };
+}
+
 export default function CheckoutPage() {
   const { items, subtotal, hydrated } = useCart();
-  // Mismo cálculo que usa el servidor al crear la orden.
-  const shipping = shippingCostFor(subtotal);
-  // const iva = ivaCopFor(subtotal + shipping);
-  const total = subtotal + shipping /*+ iva*/;
-  const faltaParaEnvioGratis = FREE_SHIPPING_THRESHOLD_COP - subtotal;
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   // Se calcula una sola vez al montar. Puede hacerse en el cliente sin
@@ -61,7 +66,13 @@ export default function CheckoutPage() {
   // Los campos siguen siendo no controlados (`defaultValue`) para no
   // re-renderizar en cada tecla: al precargarlos se remonta el bloque con
   // `key` en vez de sincronizar estado campo por campo.
-  const [datos, setDatos] = useState<CustomerInfo>(local ?? EMPTY_CUSTOMER_INFO);
+  const [datos, setDatos] = useState<CustomerInfo>(() =>
+    conUbicacionOficial(local ?? EMPTY_CUSTOMER_INFO),
+  );
+  // Departamento y municipio sí van en estado: son selects encadenados y el
+  // departamento define el flete del resumen.
+  const [departamento, setDepartamento] = useState(datos.departamento);
+  const [municipio, setMunicipio] = useState(datos.municipio);
   const [datosKey, setDatosKey] = useState(0);
   const [origen, setOrigen] = useState<Origen>(local ? "navegador" : null);
   const [recordar, setRecordar] = useState(local !== null);
@@ -70,8 +81,21 @@ export default function CheckoutPage() {
   // más tarde, por red) no le pisa lo que lleva escrito.
   const tocadoRef = useRef(false);
 
+  // Mismo cálculo que usa el servidor al crear la orden. Sin departamento
+  // elegido el flete aún no se conoce (salvo que ya sea gratis), así que no
+  // se muestra ni se suma.
+  const envioGratis = subtotal >= FREE_SHIPPING_THRESHOLD_COP;
+  const envioConocido = envioGratis || departamento !== "";
+  const shipping = envioConocido ? shippingCostFor(subtotal, departamento) : 0;
+  // const iva = ivaCopFor(subtotal + shipping);
+  const total = subtotal + shipping /*+ iva*/;
+  const faltaParaEnvioGratis = FREE_SHIPPING_THRESHOLD_COP - subtotal;
+
   function precargar(info: CustomerInfo, desde: Origen) {
+    info = conUbicacionOficial(info);
     setDatos(info);
+    setDepartamento(info.departamento);
+    setMunicipio(info.municipio);
     setDatosKey((k) => k + 1);
     setOrigen(desde);
   }
@@ -180,7 +204,9 @@ export default function CheckoutPage() {
     setError(
       res.error === "missing_keys"
         ? "El pago aún no está configurado. Faltan las llaves de Wompi (WOMPI_PUBLIC_KEY / WOMPI_INTEGRITY_SECRET) en el servidor."
-        : "No pudimos iniciar el pago. Revisa tu carrito e intenta de nuevo.",
+        : res.error === "invalid_location"
+          ? "Elige un departamento y un municipio de la lista."
+          : "No pudimos iniciar el pago. Revisa tu carrito e intenta de nuevo.",
     );
   }
 
@@ -280,25 +306,50 @@ export default function CheckoutPage() {
             <div className="grid gap-5 sm:grid-cols-2">
               <div>
                 <FieldLabel htmlFor="departamento">Departamento</FieldLabel>
-                <Input
+                <Select
                   id="departamento"
                   name="departamento"
                   required
                   autoComplete="address-level1"
-                  defaultValue={datos.departamento}
-                  placeholder="Antioquia"
-                />
+                  value={departamento}
+                  onChange={(e) => {
+                    setDepartamento(e.target.value);
+                    // El municipio anterior ya no pertenece al nuevo depto.
+                    setMunicipio("");
+                  }}
+                >
+                  <option value="" disabled>
+                    Elige tu departamento
+                  </option>
+                  {DEPARTAMENTOS.map((d) => (
+                    <option key={d.nombre} value={d.nombre}>
+                      {d.nombre}
+                    </option>
+                  ))}
+                </Select>
               </div>
               <div>
                 <FieldLabel htmlFor="municipio">Municipio / Ciudad</FieldLabel>
-                <Input
+                <Select
                   id="municipio"
                   name="municipio"
                   required
                   autoComplete="address-level2"
-                  defaultValue={datos.municipio}
-                  placeholder="Medellín"
-                />
+                  value={municipio}
+                  onChange={(e) => setMunicipio(e.target.value)}
+                  disabled={departamento === ""}
+                >
+                  <option value="" disabled>
+                    {departamento === ""
+                      ? "Primero elige el departamento"
+                      : "Elige tu municipio"}
+                  </option>
+                  {municipiosDe(departamento).map((m) => (
+                    <option key={m} value={m}>
+                      {m}
+                    </option>
+                  ))}
+                </Select>
               </div>
             </div>
             <div>
@@ -344,7 +395,9 @@ export default function CheckoutPage() {
           >
             {loading
               ? "Redirigiendo…"
-              : `Pagar con Wompi · ${formatCOP(total)}`}
+              : envioConocido
+                ? `Pagar con Wompi · ${formatCOP(total)}`
+                : "Pagar con Wompi"}
           </Button>
 
           {error ? (
@@ -416,7 +469,11 @@ export default function CheckoutPage() {
                 </div>
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-humo">Envío</span>
-                  {shipping === 0 ? (
+                  {!envioConocido ? (
+                    <span className="text-xs text-humo/80">
+                      Elige tu departamento
+                    </span>
+                  ) : shipping === 0 ? (
                     <span className="font-heading font-bold uppercase text-neon">
                       Gratis
                     </span>
@@ -438,8 +495,13 @@ export default function CheckoutPage() {
                   <span className="font-heading uppercase tracking-wide text-humo">
                     Total
                   </span>
-                  <span className="font-heading text-2xl font-bold text-glow">
+                  <span className="text-right font-heading text-2xl font-bold text-glow">
                     {formatCOP(total)}
+                    {!envioConocido ? (
+                      <span className="block font-body text-xs font-normal text-humo/80">
+                        + envío
+                      </span>
+                    ) : null}
                   </span>
                 </div>
               </div>

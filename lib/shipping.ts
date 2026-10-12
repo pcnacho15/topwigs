@@ -1,23 +1,46 @@
 /**
- * Tarifa plana de envío nacional (Interrápidísimo). Mismo costo para todo
- * el país, incluida Medellín. Único lugar donde vive este número: si el
- * flete cambia, se actualiza aquí.
+ * Tarifa plana de envío nacional (Interrápidísimo) para todo el país fuera
+ * de Antioquia. Único lugar donde vive este número: si el flete cambia, se
+ * actualiza aquí.
  */
 export const SHIPPING_COST_COP = 18500;
+
+/** Tarifa de envío dentro de Antioquia (incluida Medellín). */
+export const SHIPPING_COST_ANTIOQUIA_COP = 12000;
 
 /** A partir de este subtotal (productos, sin flete) el envío no se cobra. */
 export const FREE_SHIPPING_THRESHOLD_COP = 499_000;
 
 /**
- * Flete que corresponde a un subtotal. Se usa tanto en el resumen del
- * checkout como al crear la orden en el servidor, para que lo que ve el
- * cliente y lo que se cobra salgan del mismo cálculo.
- *
- * El umbral es inclusivo: un subtotal de exactamente $500.000 ya viaja
- * gratis.
+ * El departamento llega como texto libre del formulario: se compara sin
+ * tildes, mayúsculas ni espacios sobrantes ("ANTIOQUÍA " cuenta).
  */
-export function shippingCostFor(subtotalCop: number): number {
-  return subtotalCop >= FREE_SHIPPING_THRESHOLD_COP ? 0 : SHIPPING_COST_COP;
+function esAntioquia(departamento: string | null | undefined): boolean {
+  return (
+    (departamento ?? "")
+      .normalize("NFD")
+      .replace(/[̀-ͯ]/g, "")
+      .trim()
+      .toLowerCase() === "antioquia"
+  );
+}
+
+/**
+ * Flete que corresponde a un subtotal y un departamento de destino. Se usa
+ * tanto en el resumen del checkout como al crear la orden en el servidor,
+ * para que lo que ve el cliente y lo que se cobra salgan del mismo cálculo.
+ *
+ * El umbral es inclusivo: un subtotal de exactamente el umbral ya viaja
+ * gratis, sin importar el departamento.
+ */
+export function shippingCostFor(
+  subtotalCop: number,
+  departamento?: string | null,
+): number {
+  if (subtotalCop >= FREE_SHIPPING_THRESHOLD_COP) return 0;
+  return esAntioquia(departamento)
+    ? SHIPPING_COST_ANTIOQUIA_COP
+    : SHIPPING_COST_COP;
 }
 
 /**

@@ -29,11 +29,32 @@ export interface PublicColor {
   videos: string[];
 }
 
+/** Una característica de la ficha informativa de una categoría. */
+export interface PublicCaracteristica {
+  titulo: string;
+  imagen: string | null;
+  pieImagen: string;
+  puntos: string[];
+}
+
+/**
+ * Ficha informativa de una categoría ("¿Qué es un Lace Front 13x4?") que
+ * se abre en un modal desde el Home, el catálogo y la ficha de producto.
+ */
+export interface PublicCategoriaFicha {
+  nombre: string;
+  /** 1–2 líneas; puede venir vacío. */
+  resumen: string;
+  caracteristicas: PublicCaracteristica[];
+}
+
 export interface PublicCategory {
   id: string;
   slug: string;
   nombre: string;
   imagen: string | null;
+  resumen: string;
+  caracteristicas: PublicCaracteristica[];
 }
 
 /** Categoría + el catálogo al que pertenece (tarjetas del Home). */

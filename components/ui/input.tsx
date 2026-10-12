@@ -1,5 +1,10 @@
-import type { InputHTMLAttributes, TextareaHTMLAttributes } from "react";
+import type {
+  InputHTMLAttributes,
+  SelectHTMLAttributes,
+  TextareaHTMLAttributes,
+} from "react";
 import { cn } from "@/lib/utils";
+import { ChevronRight } from "@/components/icons";
 
 const fieldBase =
   "w-full rounded-goth border border-linea bg-surface-1 px-4 py-3 text-sm text-blanco " +
@@ -18,6 +23,32 @@ export function Textarea({
 }: TextareaHTMLAttributes<HTMLTextAreaElement>) {
   return (
     <textarea className={cn(fieldBase, "min-h-28 resize-y", className)} {...props} />
+  );
+}
+
+/** Select nativo con el mismo look de los inputs y una flecha propia. */
+export function Select({
+  className,
+  children,
+  ...props
+}: SelectHTMLAttributes<HTMLSelectElement>) {
+  return (
+    <div className="relative">
+      <select
+        className={cn(
+          fieldBase,
+          "h-12 cursor-pointer appearance-none pr-10 disabled:cursor-not-allowed disabled:opacity-50",
+          className,
+        )}
+        {...props}
+      >
+        {children}
+      </select>
+      <ChevronRight
+        aria-hidden
+        className="pointer-events-none absolute right-3 top-1/2 size-4 -translate-y-1/2 rotate-90 text-humo"
+      />
+    </div>
   );
 }
 

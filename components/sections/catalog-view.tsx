@@ -5,6 +5,7 @@ import type { PublicProduct, PublicCategory } from "@/lib/public-product";
 import { ProductCard } from "@/components/ui/product-card";
 import { RetroWindow } from "@/components/ui/retro-window";
 import { SectionHeading } from "@/components/ui/section-heading";
+import { CategoryInfo } from "@/components/ui/category-info";
 import { Reveal } from "@/components/motion/reveal";
 import { Stagger, StaggerItem } from "@/components/motion/stagger";
 import { Search, HeartDrip } from "@/components/icons";
@@ -49,6 +50,11 @@ export function CatalogView({
     ],
     [categorias],
   );
+
+  // Ficha de la categoría elegida (ninguna en "Todas").
+  const activa = categorias.find((c) => c.slug === categoria);
+  const conFicha =
+    activa && (activa.resumen !== "" || activa.caracteristicas.length > 0);
 
   const filtered = useMemo(() => {
     const q = norm(query.trim());
@@ -139,6 +145,19 @@ export function CatalogView({
                 />
               </label>
             </div>
+
+            {/* Resumen + ficha de la categoría elegida */}
+            {activa && conFicha ? (
+              <div className="flex flex-col gap-3 rounded-goth border border-neon/30 bg-neon/5 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+                <p className="text-sm text-humo">
+                  <span className="font-heading font-bold uppercase tracking-wide text-neon">
+                    {activa.nombre}
+                  </span>
+                  {activa.resumen ? <> · {activa.resumen}</> : null}
+                </p>
+                <CategoryInfo ficha={activa} className="shrink-0 self-start sm:self-auto" />
+              </div>
+            ) : null}
 
             {/* Conteo de resultados */}
             <p className="font-pixel text-[10px] uppercase tracking-widest text-humo/70">

@@ -1294,6 +1294,30 @@ export function municipiosDe(departamento: string): string[] {
   return PORNOMBRE.get(departamento) ?? [];
 }
 
+/** Texto comparable: sin tildes, mayúsculas ni espacios sobrantes. */
+function clave(texto: string): string {
+  return texto
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .trim()
+    .toLowerCase();
+}
+
+/**
+ * Lleva una ubicación escrita a mano (p. ej. datos guardados antes de que el
+ * checkout usara selects: "antioquia", "Medellin") a los nombres oficiales
+ * de esta lista. Lo que no se reconoce queda vacío para que se elija de nuevo.
+ */
+export function normalizarUbicacion(
+  departamento: string,
+  municipio: string,
+): { departamento: string; municipio: string } {
+  const dep = DEPARTAMENTOS.find((d) => clave(d.nombre) === clave(departamento));
+  if (!dep) return { departamento: "", municipio: "" };
+  const mun = dep.municipios.find((m) => clave(m) === clave(municipio));
+  return { departamento: dep.nombre, municipio: mun ?? "" };
+}
+
 /** ¿El par departamento/municipio existe? Se valida también en el servidor. */
 export function ubicacionValida(
   departamento: string,
