@@ -34,6 +34,10 @@ import {
 import { ShippingSteps } from "@/components/ui/shipping-steps";
 import { createWompiCheckout } from "./actions";
 import {
+  readPendingCheckout,
+  writePendingCheckout,
+} from "@/lib/pending-checkout";
+import {
   deleteSavedCustomerInfo,
   getCheckoutPrefill,
   saveCustomerInfo,
@@ -49,9 +53,18 @@ function conUbicacionOficial(info: CustomerInfo): CustomerInfo {
 }
 
 export default function CheckoutPage() {
-  const { items, subtotal, hydrated } = useCart();
+  const { items, subtotal, hydrated, syncStock, refreshStock } = useCart();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Al entrar al checkout se revalida el stock: el carrito pudo armarse
+  // hace rato y entretanto otra compra pudo apartar unidades.
+  const stockRevisado = useRef(false);
+  useEffect(() => {
+    if (!hydrated || stockRevisado.current) return;
+    stockRevisado.current = true;
+    refreshStock();
+  }, [hydrated, refreshStock]);
   // Se calcula una sola vez al montar. Puede hacerse en el cliente sin
   // riesgo de hidratación porque el guard de `hydrated` de más abajo impide
   // que esta pantalla se pinte en el servidor; y las fechas se fijan a la
@@ -192,15 +205,27 @@ export default function CheckoutPage() {
         colorNombre: i.colorNombre,
       })),
       customer,
+      reemplaza: readPendingCheckout(),
     });
 
     if (res.ok) {
+      // Si vuelve sin pagar y reintenta, esta reserva se reemplaza.
+      writePendingCheckout(res.reference);
       // Redirige a la pasarela de Wompi.
       window.location.href = res.url;
       return;
     }
 
     setLoading(false);
+    if (res.error === "insufficient_stock") {
+      // El carrito se recorta al stock real; la persona revisa el resumen
+      // actualizado antes de volver a pagar.
+      syncStock(res.stock);
+      setError(
+        "Algunos productos ya no tienen las unidades que pediste. Ajustamos tu carrito al stock disponible: revisa el resumen e intenta de nuevo.",
+      );
+      return;
+    }
     setError(
       res.error === "missing_keys"
         ? "El pago aún no está configurado. Faltan las llaves de Wompi (WOMPI_PUBLIC_KEY / WOMPI_INTEGRITY_SECRET) en el servidor."

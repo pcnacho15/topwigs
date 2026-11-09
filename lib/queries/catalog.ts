@@ -104,6 +104,7 @@ function mapProduct(p: ProductWithCategory): PublicProduct {
     reviews: p.reviews,
     nuevo: p.nuevo,
     agotado: !p.activo || p.stock <= 0,
+    stock: p.activo ? Math.max(0, p.stock) : 0,
     colores: normalizeColores(p.colores, imagenes, videos),
     features: (p.features as unknown as string[]) ?? [],
     tips: (p.tips as unknown as string[]) ?? [],

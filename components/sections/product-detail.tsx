@@ -33,11 +33,19 @@ export function ProductDetail({
   /** Ficha de la categoría del producto; `null` si no tiene características. */
   fichaCategoria: PublicCategoriaFicha | null;
 }) {
-  const { add, open } = useCart();
+  const { add, open, qtyInCart } = useCart();
   const router = useRouter();
   const [color, setColor] = useState(0);
-  const [qty, setQty] = useState(1);
+  const [qtyElegida, setQty] = useState(1);
   const [mediaIndex, setMediaIndex] = useState(0);
+
+  // El stock es del producto (todos sus colores): lo que ya está en el
+  // carrito se descuenta de lo que todavía se puede agregar.
+  const enCarrito = qtyInCart(product.slug);
+  const disponible = Math.max(0, product.stock - enCarrito);
+  const sinUnidades = product.agotado || disponible <= 0;
+  const maxQty = Math.min(10, disponible);
+  const qty = Math.max(1, Math.min(qtyElegida, maxQty));
 
   const activeColor = product.colores[color];
 
@@ -96,13 +104,19 @@ export function ProductDetail({
     // La línea del carrito es un color concreto: se prefiere su primera
     // imagen y, si ese color no tiene ninguna, la primera del producto.
     imagen: activeColor?.imagenes[0] ?? product.imagenes[0],
+    stock: product.stock,
   });
   const handleAdd = () => {
+    if (sinUnidades) return;
     add(buildItem(), qty);
+    setQty(1);
     open();
   };
+  /** Si ya tiene todo el stock en el carrito, "Comprar ahora" solo lleva
+   * al checkout sin agregar nada. */
   const handleBuy = () => {
-    add(buildItem(), qty);
+    if (product.agotado) return;
+    if (disponible > 0) add(buildItem(), qty);
     router.push("/checkout");
   };
 
@@ -270,7 +284,7 @@ export function ProductDetail({
           </span>
           <div className="flex items-center rounded-md border border-linea bg-linea/50">
             <button
-              onClick={() => setQty((q) => Math.max(1, q - 1))}
+              onClick={() => setQty(Math.max(1, qty - 1))}
               aria-label="Disminuir cantidad"
               className="grid size-10 cursor-pointer place-items-center text-humo transition-colors hover:text-neon"
             >
@@ -280,23 +294,43 @@ export function ProductDetail({
               {qty}
             </span>
             <button
-              onClick={() => setQty((q) => Math.min(10, q + 1))}
+              onClick={() => setQty(Math.min(maxQty, qty + 1))}
+              disabled={qty >= maxQty}
               aria-label="Aumentar cantidad"
-              className="grid size-10 cursor-pointer place-items-center text-humo transition-colors hover:text-neon"
+              className="grid size-10 cursor-pointer place-items-center text-humo transition-colors hover:text-neon disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:text-humo"
             >
               <Plus className="size-4" />
             </button>
           </div>
         </div>
+        {!product.agotado && product.stock <= 5 ? (
+          <p className="-mt-3 text-xs text-humo">
+            {disponible <= 0
+              ? "Ya tienes en tu carrito todas las unidades disponibles."
+              : enCarrito > 0
+                ? `Puedes agregar ${disponible} más (ya tienes ${enCarrito} en tu carrito).`
+                : product.stock === 1
+                  ? "¡Última unidad disponible!"
+                  : `Solo quedan ${product.stock} unidades.`}
+          </p>
+        ) : !product.agotado && disponible <= 0 ? (
+          <p className="-mt-3 text-xs text-humo">
+            Ya tienes en tu carrito todas las unidades disponibles.
+          </p>
+        ) : null}
 
         {/* Acciones */}
         <div className="flex flex-col gap-3 sm:flex-row">
           <Button
             onClick={handleAdd}
-            disabled={product.agotado}
+            disabled={sinUnidades}
             className="flex-none sm:flex-1 text-white"
           >
-            {product.agotado ? "Agotado" : "Agregar al carrito"}
+            {product.agotado
+              ? "Agotado"
+              : disponible <= 0
+                ? "Sin unidades disponibles"
+                : "Agregar al carrito"}
           </Button>
           <Button
             variant="outline"

@@ -77,6 +77,9 @@ export interface PublicProduct {
   nuevo: boolean;
   /** true si stock=0 o el admin lo desactivó: sigue visible, pero no se puede comprar. */
   agotado: boolean;
+  /** Unidades que se pueden comprar (0 si está agotado o desactivado). El
+   * stock es del producto, no del color: el carrito suma todos sus colores. */
+  stock: number;
   colores: PublicColor[];
   features: string[];
   tips: string[];

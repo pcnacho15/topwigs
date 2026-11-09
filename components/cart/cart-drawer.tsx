@@ -12,8 +12,16 @@ import { Minus, Plus, HeartDrip } from "@/components/icons";
 /** Drawer lateral del carrito. Se abre desde el ícono del navbar o al
  * agregar un producto. Sin backend: al pagar navega a /checkout. */
 export function CartDrawer() {
-  const { items, subtotal, isOpen, close, setQty, remove, totalItems } =
-    useCart();
+  const {
+    items,
+    subtotal,
+    isOpen,
+    close,
+    setQty,
+    remove,
+    totalItems,
+    canIncrease,
+  } = useCart();
 
   // Bloquea el scroll del body mientras el drawer está abierto.
   useEffect(() => {
@@ -71,7 +79,9 @@ export function CartDrawer() {
             {/* Items */}
             {items.length > 0 ? (
               <ul className="flex-1 divide-y divide-linea overflow-y-auto px-5">
-                {items.map((item) => (
+                {items.map((item) => {
+                  const puedeSubir = canIncrease(item.id);
+                  return (
                   <li key={item.id} className="flex gap-4 py-4">
                     {item.imagen ? (
                       <div className="relative size-16 shrink-0 overflow-hidden rounded-goth border border-linea bg-surface-1">
@@ -126,7 +136,8 @@ export function CartDrawer() {
                           <button
                             aria-label="Aumentar"
                             onClick={() => setQty(item.id, item.qty + 1)}
-                            className="grid size-8 place-items-center text-humo hover:text-neon"
+                            disabled={!puedeSubir}
+                            className="grid size-8 place-items-center text-humo hover:text-neon disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:text-humo"
                           >
                             <Plus className="size-3.5" />
                           </button>
@@ -135,9 +146,17 @@ export function CartDrawer() {
                           {formatCOP(item.precio * item.qty)}
                         </span>
                       </div>
+                      {!puedeSubir && item.stock != null ? (
+                        <p className="text-xs text-humo/70">
+                          {item.stock === 1
+                            ? "Solo queda 1 unidad disponible."
+                            : `Solo quedan ${item.stock} unidades disponibles.`}
+                        </p>
+                      ) : null}
                     </div>
                   </li>
-                ))}
+                  );
+                })}
               </ul>
             ) : (
               <div className="flex flex-1 flex-col items-center justify-center gap-3 px-5 text-center">

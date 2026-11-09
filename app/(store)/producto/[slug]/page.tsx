@@ -15,6 +15,7 @@ import { Carousel, CarouselItem } from "@/components/ui/carousel";
 import { Reveal } from "@/components/motion/reveal";
 import { ChevronRight } from "@/components/icons";
 import { estimateDelivery } from "@/lib/delivery";
+import { liberarReservasVencidas } from "@/lib/stock-reservations";
 
 // Siempre fresco desde la DB (refleja cambios del admin al instante).
 export const dynamic = "force-dynamic";
@@ -36,6 +37,8 @@ export default async function ProductoPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
+  // Devuelve al stock las reservas de checkouts que vencieron sin pago.
+  await liberarReservasVencidas();
   const product = await getPublicProductBySlug(slug);
   if (!product) notFound();
 

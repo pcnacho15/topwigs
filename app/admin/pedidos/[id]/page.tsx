@@ -5,7 +5,12 @@ import { ArrowLeft } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { formatCOP } from "@/components/ui/price";
 import { formatDate } from "@/lib/utils";
-import { ORDER_STATUS_LABEL, ORDER_STATUS_COLOR } from "@/lib/orders";
+import {
+  ORDER_STATUS_LABEL,
+  ORDER_STATUS_COLOR,
+  STOCK_STATUS_LABEL,
+  STOCK_STATUS_COLOR,
+} from "@/lib/orders";
 import { Button } from "@/components/shadcn/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/shadcn/card";
 import {
@@ -52,7 +57,21 @@ export default async function PedidoDetallePage({
         <span className={ORDER_STATUS_COLOR[pedido.status] ?? "text-humo"}>
           {ORDER_STATUS_LABEL[pedido.status] ?? pedido.status}
         </span>
+        {pedido.stockStatus ? (
+          <span
+            className={`text-xs ${STOCK_STATUS_COLOR[pedido.stockStatus] ?? "text-humo"}`}
+          >
+            · {STOCK_STATUS_LABEL[pedido.stockStatus] ?? pedido.stockStatus}
+          </span>
+        ) : null}
       </div>
+      {pedido.stockStatus === "OVERSOLD" ? (
+        <p role="alert" className="rounded-md border border-red-500/50 bg-red-500/10 px-4 py-3 text-sm text-red-400">
+          Este pedido se pagó después de que su reserva venció y ya no había
+          unidades suficientes. El stock quedó en 0: confirma inventario con
+          el cliente (reponer o reembolsar).
+        </p>
+      ) : null}
 
       <div className="grid gap-6 lg:grid-cols-3">
         <Card className="lg:col-span-2">

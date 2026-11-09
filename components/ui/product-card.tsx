@@ -32,7 +32,10 @@ export function ProductCard({ product }: { product: PublicProduct }) {
       colorNombre: primerColor?.nombre ?? "Único",
       colorHex: primerColor?.from ?? "#ff2f92",
       imagen: primerColor?.imagenes[0] ?? img,
+      stock: product.stock,
     });
+    // Aunque no entre nada (ya tiene todo el stock en el carrito), se abre
+    // el drawer: ahí se ve el aviso de unidades disponibles.
     open();
   };
 

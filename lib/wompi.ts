@@ -1,6 +1,7 @@
 import "server-only";
 import { prisma } from "@/lib/db";
 import { sendOrderStatusEmail } from "@/lib/email";
+import { confirmarStockPedido } from "@/lib/stock-reservations";
 
 /** Estados de transacción de Wompi, iguales a `Order.status`. */
 const VALID_STATUSES = new Set(["PENDING", "APPROVED", "DECLINED", "VOIDED", "ERROR"]);
@@ -103,11 +104,16 @@ export async function applyWompiTransaction(tx: WompiTransactionStatus): Promise
     });
   }
 
+  // Inventario: la reserva hecha al crear la orden pasa a vendida (o, si
+  // ya había vencido, se descuenta de nuevo). Es idempotente, así que se
+  // llama en cada aprobación y no solo en la primera transición: si un
+  // intento anterior falló a medias, este lo completa.
+  if (status === "APPROVED") {
+    await confirmarStockPedido(order.id);
+  }
+
   if (isNewTerminalTransition) {
     const items = (order.items as unknown as OrderEmailItem[]) ?? [];
-    if (status === "APPROVED") {
-      await decrementStock(items);
-    }
     await sendOrderStatusEmail({
       to: order.customerEmail,
       customerName: order.customerName,
@@ -126,21 +132,6 @@ export async function applyWompiTransaction(tx: WompiTransactionStatus): Promise
   }
 
   return { ok: true, status };
-}
-
-/** Descuenta del inventario las unidades vendidas en un pedido aprobado. */
-async function decrementStock(items: OrderEmailItem[]): Promise<void> {
-  for (const item of items) {
-    const product = await prisma.product.findUnique({
-      where: { slug: item.slug },
-      select: { stock: true },
-    });
-    if (!product) continue;
-    await prisma.product.update({
-      where: { slug: item.slug },
-      data: { stock: Math.max(0, product.stock - item.qty) },
-    });
-  }
 }
 
 interface OrderEmailItem {

@@ -146,10 +146,19 @@ model Order {
   totalCop           Int // subtotalCop + shippingCop + ivaCop; monto realmente cobrado
   status             String   @default("PENDING") // PENDING|APPROVED|DECLINED|VOIDED|ERROR
   wompiTransactionId String?
+  // Inventario del pedido (ver lib/stock-reservations.ts):
+  // RESERVED  = unidades apartadas al crear la orden, aún sin pago aprobado
+  // COMMITTED = pago aprobado, las unidades quedan vendidas
+  // RELEASED  = la reserva venció sin pago y las unidades volvieron al stock
+  // OVERSOLD  = se aprobó después de liberar y ya no había stock suficiente
+  // null      = pedidos anteriores a las reservas (se descuenta al aprobar)
+  stockStatus        String?
+  reservaExpiraEn    DateTime? // cuándo se libera la reserva si no hay pago aprobado
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
 
   @@index([userId])
+  @@index([stockStatus, reservaExpiraEn])
 }
 
 /**

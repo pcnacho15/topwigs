@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { useCart } from "@/components/cart/cart-context";
+import { clearPendingCheckout } from "@/lib/pending-checkout";
 
 /** Limpia el carrito una vez al montar (tras volver del pago). */
 export function ClearCartOnMount() {
@@ -12,6 +13,8 @@ export function ClearCartOnMount() {
     // sobreescribe el carrito vacío con el carrito guardado.
     if (!hydrated) return;
     clear();
+    // El pago se aprobó: ese checkout ya no es una reserva "reutilizable".
+    clearPendingCheckout();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hydrated]);
   return null;

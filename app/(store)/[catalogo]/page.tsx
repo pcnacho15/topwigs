@@ -6,6 +6,7 @@ import {
   getPublicProductsByTipo,
   getPublicCategoriesByTipo,
 } from "@/lib/queries/catalog";
+import { liberarReservasVencidas } from "@/lib/stock-reservations";
 
 // Los catálogos los crea el admin en la base de datos, así que la ruta no se
 // puede prerenderizar a build time: se resuelve en cada visita, igual que la
@@ -40,6 +41,8 @@ export default async function CatalogoPage({
   if (!tipo) notFound();
 
   const { categoria } = await searchParams;
+  // Devuelve al stock las reservas de checkouts que vencieron sin pago.
+  await liberarReservasVencidas();
   const [productos, categorias] = await Promise.all([
     getPublicProductsByTipo(tipo.slug),
     getPublicCategoriesByTipo(tipo.slug),
