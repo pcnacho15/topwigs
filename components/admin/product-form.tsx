@@ -72,16 +72,53 @@ const EMPTY: ProductInput = {
   videos: [],
 };
 
+/**
+ * Características y tips que comparten casi todas las pelucas. Al crear una
+ * peluca llegan precargados para no escribirlos uno por uno; el admin puede
+ * quitar o agregar los que quiera antes de guardar.
+ */
+const PELUCA_SLUG = "pelucas";
+const PELUCA_FEATURES_DEFAULT = [
+  "Resistente al calor",
+  "Ajustable al tamaño de tu cabeza",
+  "28 pulgadas de largo",
+  "Incluye wig cap",
+  "Diseño glueless",
+  "Fibra seminatural",
+];
+const PELUCA_TIPS_DEFAULT = [
+  "Lavar con agua fría o tibia",
+  "Usar shampoo y acondicionador al lavar",
+  "Usar aceite capilar en sus puntas",
+  "Desenredar de puntas a medios",
+  "Usar mínima temperatura de calor al usar plancha",
+  "Dejar secar al aire libre",
+];
+
+const mismaLista = (a: string[], b: string[]) =>
+  a.length === b.length && a.every((v, i) => v === b[i]);
+
 export function ProductForm({ mode, id, categorias, initial }: Props) {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
 
+  const esPeluca = (tipoId: string | undefined) =>
+    categorias.find((c) => c.tipoId === tipoId)?.tipoSlug === PELUCA_SLUG;
+
   const form = useForm<ProductInput>({
     resolver: zodResolver(productSchema),
-    defaultValues: initial ?? {
-      ...EMPTY,
-      categoryId: categorias[0]?.id ?? "",
-    },
+    defaultValues:
+      initial ??
+      (() => {
+        const primera = categorias[0];
+        const peluca = primera?.tipoSlug === PELUCA_SLUG;
+        return {
+          ...EMPTY,
+          categoryId: primera?.id ?? "",
+          features: peluca ? [...PELUCA_FEATURES_DEFAULT] : [],
+          tips: peluca ? [...PELUCA_TIPS_DEFAULT] : [],
+        };
+      })(),
   });
 
   const colores = useFieldArray({ control: form.control, name: "colores" });
@@ -142,6 +179,23 @@ export function ProductForm({ mode, id, categorias, initial }: Props) {
     setTipoId(nuevoTipoId);
     const primera = categorias.find((c) => c.tipoId === nuevoTipoId);
     form.setValue("categoryId", primera?.id ?? "", { shouldDirty: true });
+
+    // Solo al crear: los valores por defecto de pelucas siguen al tipo
+    // elegido, sin pisar listas que el admin ya haya personalizado.
+    if (mode !== "create") return;
+    const aPeluca = esPeluca(nuevoTipoId);
+    const listas = [
+      ["features", PELUCA_FEATURES_DEFAULT],
+      ["tips", PELUCA_TIPS_DEFAULT],
+    ] as const;
+    for (const [campo, defaults] of listas) {
+      const actual = form.getValues(campo);
+      if (aPeluca && actual.length === 0) {
+        form.setValue(campo, [...defaults], { shouldDirty: true });
+      } else if (!aPeluca && mismaLista(actual, defaults)) {
+        form.setValue(campo, [], { shouldDirty: true });
+      }
+    }
   }
 
   /**
